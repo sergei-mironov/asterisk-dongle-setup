@@ -64,7 +64,7 @@ let
           rm $out/etc/asterisk/asterisk.conf
           cat >$out/etc/asterisk/asterisk.conf <<EOF
           [directories]
-          astetcdir => ${asterisk}/etc/asterisk
+          astetcdir => $out/etc/asterisk
           astmoddir => ${asterisk-modules}
           astvarlibdir => ${asterisk}/var/lib/asterisk
           astdbdir => /tmp/asterisk
@@ -78,7 +78,6 @@ let
           EOF
 
           cp -v ${asterisk-chan-dongle.src}/etc/dongle.conf $out/etc/asterisk
-          cp -v ${asterisk-chan-dongle.src}/etc/dongle.conf $out/etc
         '';
       };
 
