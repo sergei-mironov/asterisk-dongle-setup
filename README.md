@@ -25,3 +25,11 @@ Issues
 
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
 * https://github.com/wdoekes/asterisk-chan-dongle/issues/110
+
+
+References
+==========
+
+* GSMCTL https://www.unix.com/man-page/debian/8/gsmctl/
+  - Homepage looks inactive
+* MMCLI https://www.freedesktop.org/software/ModemManager/man/1.0.0/mmcli.8.html
