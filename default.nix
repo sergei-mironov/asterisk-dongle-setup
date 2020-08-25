@@ -23,7 +23,7 @@ let
         #   sha256 = "sha256:1nvbc5azqgpc7vwyc0mskqxpnrz8a65a37r6n7nisw3r9q7axasy";
         # };
 
-        src = ../asterisk-chan-dongle;
+        src = ./asterisk-chan-dongle;
 
         preConfigure = ''
           ./bootstrap
