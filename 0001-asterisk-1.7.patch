@@ -1,0 +1,84 @@
+From 412eb8923deea12a564a0d1fc361eda224a60014 Mon Sep 17 00:00:00 2001
+From: Sergey Mironov <grrwlf@gmail.com>
+Date: Sat, 29 Aug 2020 15:54:28 +0300
+Subject: [PATCH] asterisk: 1.7
+
+---
+ pkgs/servers/asterisk/default.nix | 19 ++++++++++++++++++-
+ pkgs/top-level/all-packages.nix   |  2 +-
+ 2 files changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/pkgs/servers/asterisk/default.nix b/pkgs/servers/asterisk/default.nix
+index 1e5ba46d382..fb6ea5cf5cf 100644
+--- a/pkgs/servers/asterisk/default.nix
++++ b/pkgs/servers/asterisk/default.nix
+@@ -6,7 +6,7 @@
+ }:
+ 
+ let
+-  common = {version, sha256, externals}: stdenv.mkDerivation {
++  common = {version, sha256, externals, extra_install ? ""}: stdenv.mkDerivation {
+     inherit version;
+     pname = "asterisk";
+ 
+@@ -27,6 +27,7 @@ let
+     # Disable MD5 verification for pjsip
+     postPatch = ''
+       sed -i 's|$(verify_tarball)|true|' third-party/pjproject/Makefile
++      sed -i 's|--prefix=/opt/pjproject|--prefix=''${out}|' third-party/pjproject/Makefile.rules
+     '';
+ 
+     src = fetchurl {
+@@ -68,6 +69,7 @@ let
+     postInstall = ''
+       # Install sample configuration files for this version of Asterisk
+       make samples
++      ${extra_install}
+     '';
+ 
+     meta = with stdenv.lib; {
+@@ -88,6 +90,11 @@ let
+     sha256 = "0ybg0113rp3fk49rm2v0pcgqb28h3dv1pdy9594w2ggiz7bhngah";
+   };
+ 
++  pjproject_2_10 = fetchurl {
++    url = https://raw.githubusercontent.com/asterisk/third-party/master/pjproject/2.10/pjproject-2.10.tar.bz2;
++    sha256 = "sha256:14qmddinm4bv51rl0wwg5133r64x5bd6inwbx27ahb2n0151m2if";
++  };
++
+   mp3-202 = fetchsvn {
+     url = http://svn.digium.com/svn/thirdparty/mp3/trunk;
+     rev = "202";
+@@ -132,6 +139,16 @@ in rec {
+     };
+   };
+ 
++  asterisk_17 = common {
++    version = "17.6.0";
++    sha256 = "sha256:0ca41aghizri6fzwbi4xcmps3gw3y182h82pw0m3yjgm15cdkx9r";
++    externals = {
++      "externals_cache/pjproject-2.10.tar.bz2" = pjproject_2_10;
++      "addons/mp3" = mp3-202;
++    };
++    extra_install = "make install-headers";
++  };
++
+   #asterisk-git = common {
+   #  version = "15-pre";
+   #  sha256 = "...";
+diff --git a/pkgs/top-level/all-packages.nix b/pkgs/top-level/all-packages.nix
+index 9aaa20e00f1..1237ca1a78d 100644
+--- a/pkgs/top-level/all-packages.nix
++++ b/pkgs/top-level/all-packages.nix
+@@ -15214,7 +15214,7 @@ in
+ 
+   inherit (callPackages ../servers/asterisk { })
+     asterisk asterisk-stable asterisk-lts
+-    asterisk_13 asterisk_15 asterisk_16;
++    asterisk_13 asterisk_15 asterisk_16 asterisk_17;
+ 
+   sabnzbd = callPackage ../servers/sabnzbd { };
+ 
+-- 
+2.25.4
+
