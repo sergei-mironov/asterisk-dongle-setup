@@ -13,6 +13,18 @@ let
         configureFlags = old.configureFlags ++ ["--disable-xmldoc"];
       });
 
+      usb_modeswitch = stdenv.mkDerivation {
+        name = "usb_modeswitch";
+
+        buildInputs = with pkgs; [libusb.dev pkgconfig gnumake];
+
+        makeFlags = "DESTDIR=\${out}";
+
+        src = pkgs.fetchurl {
+          url = "https://www.draisberghof.de/usb_modeswitch/usb-modeswitch-2.6.0.tar.bz2";
+          sha256 = "sha256:18wbbxc5cfsmikba0msdvd5qlaga27b32nhrzicyd9mdddp265f2";
+        };
+      };
 
       asterisk-chan-dongle = stdenv.mkDerivation {
         name = "asterisk-chan-dongle";

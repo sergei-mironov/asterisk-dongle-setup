@@ -12,11 +12,15 @@ In this playground project we try to setup Asterisk server to work with
 Usage
 =====
 
-1. `git clone ... ; cd ...`
 0. `nix-info` # Make sure you have Nix installed
-2. `./asterisk.sh`
-3. ???
-4. Continue hacking
+1. `git clone <this-repo-url> ; cd ...`
+2. Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
+   local nixpkgs.
+3. If the USB dongle is not in modem mode by default, build and use
+   usb_modeswitch: `nix-build -A usb_modeswitch`
+3. `./asterisk.sh`
+4. ???
+5. Continue hacking
 
 
 Issues
