@@ -17,11 +17,22 @@ Usage
 2. Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
    local nixpkgs.
 3. If the USB dongle is not in modem mode by default, build and use
-   usb_modeswitch: `nix-build -A usb_modeswitch`
-3. `./asterisk.sh`
-4. ???
-5. Continue hacking
+   usb_modeswitch `nix-build -A usb_modeswitch`.
+4. Run the wrapper script `./asterisk.sh`
+5. ???
+6. Continue hacking
 
+Hardware
+========
+
+We use the following USB dongle:
+
+```
+$ lsusb
+...
+Bus 001 Device 104: ID 12d1:1001 Huawei Technologies Co., Ltd.  E161/E169/E620/E800 HSDPA Modem
+...
+```
 
 Issues
 ======
