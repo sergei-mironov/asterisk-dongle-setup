@@ -13,7 +13,7 @@ Usage
 =====
 
 0. `nix-info` # Make sure you have Nix installed
-1. `git clone <this-repo-url> ; cd ...`
+1. `git clone --recursive <this-repo-url> ; cd ...`
 2. Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
    local nixpkgs.
 3. If the USB dongle is not in modem mode by default, build and use
