@@ -8,7 +8,7 @@ let
 
     collection = rec {
 
-      asterisk = pkgs.asterisk_15.overrideAttrs (old: rec {
+      asterisk = pkgs.asterisk_17.overrideAttrs (old: rec {
         pname = old.pname + "-tweaked";
         configureFlags = old.configureFlags ++ ["--disable-xmldoc"];
       });
