@@ -27,6 +27,7 @@ Hardware
 
 We use the following USB dongle:
 
+
 ```
 $ lsusb
 ...
@@ -34,12 +35,20 @@ Bus 001 Device 104: ID 12d1:1001 Huawei Technologies Co., Ltd.  E161/E169/E620/E
 ...
 ```
 
+```
+*CLI> dongle show devices
+ID           Group State      RSSI Mode Submode Provider Name  Model      Firmware          IMEI             IMSI             Number        
+dongle0      0     Free       16   0    0       Beeline        E303C      22.157.18.00.00   *************    ************     Unknown
+```
+
+See also [somewhat outdated list of supported devices](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
+
 Issues
 ======
 
 
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
-* https://github.com/wdoekes/asterisk-chan-dongle/issues/110
+* ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
 
 
 References
