@@ -3,6 +3,8 @@
 }:
 
 let
+  python = pkgs.python37Packages;
+
   local = rec {
     callPackage = pkgs.lib.callPackageWith collection;
 
@@ -23,6 +25,17 @@ let
         src = pkgs.fetchurl {
           url = "https://www.draisberghof.de/usb_modeswitch/usb-modeswitch-2.6.0.tar.bz2";
           sha256 = "sha256:18wbbxc5cfsmikba0msdvd5qlaga27b32nhrzicyd9mdddp265f2";
+        };
+      };
+
+      pyst = python.buildPythonPackage rec {
+        pname = "pyst2";
+        version = "0.5.1";
+        propagatedBuildInputs = with python ; [ six ];
+        doCheck = false; # due to missing `import SocketServer`
+        src = python.fetchPypi {
+          inherit pname version;
+          sha256 = "sha256:1kw13g7wldzrnnr9vcm97m4c8pv801hl4fl7q88jvz0q9caz9s07";
         };
       };
 
