@@ -15,7 +15,8 @@ tasks:
 Setup
 =====
 
-0. `nix-info` Make sure you have [Nix package manager](https://nixos.org/nix) installed.
+0. Install [Nix package manager](https://nixos.org/guides/install-nix.html).
+   Note that it could easily co-exist with your native package manager.
 1. `git clone --recursive <this-repo-url> ; cd ...`
 2. Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
    local nixpkgs. We use [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/) as base.
