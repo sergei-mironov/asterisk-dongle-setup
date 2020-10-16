@@ -56,6 +56,7 @@ Issues
 
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
+* https://github.com/wdoekes/asterisk-chan-dongle/issues/120
 
 
 References
