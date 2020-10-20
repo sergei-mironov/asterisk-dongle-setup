@@ -10,7 +10,7 @@ let
 
     collection = rec {
 
-      asterisk = pkgs.asterisk_17.overrideAttrs (old: rec {
+      asterisk = pkgs.asterisk_16.overrideAttrs (old: rec {
         pname = old.pname + "-tweaked";
         configureFlags = old.configureFlags ++ ["--disable-xmldoc"];
       });
@@ -68,6 +68,8 @@ let
           "--with-asterisk=${asterisk}/include"
           "--with-iconv=${pkgs.libiconv}/include"
           "--enable-debug"
+          "--enable-apps"
+          "--enable-manager"
           "DESTDIR=${placeholder "out"}"
         ];
 
@@ -113,8 +115,8 @@ let
           astsbindir => ${asterisk}/sbin
 
           [options]
-          verbose = 255
-          debug = 255
+          verbose = 9
+          debug = 9
           runuser = root		; The user to run as.
           rungroup = root		; The group to run as.
           EOF
@@ -123,8 +125,8 @@ let
           cat >$out/etc/asterisk/dongle.conf <<EOF
           [general]
           interval=15
-          smsdb=/tmp/asterisk/smsdb
-          csmsttl=600
+          ;smsdb=/tmp/asterisk/smsdb
+          ;csmsttl=5
 
           [defaults]
           context=dongle-incoming			; context for incoming calls
@@ -165,12 +167,15 @@ let
           [dongle0]
           data=/dev/ttyUSB0		; tty port for AT commands; 		no default value
           audio=/dev/ttyUSB1		; tty port for audio connection; 	no default value
+          context=dongle-incoming			; context for incoming calls
+          language=ru			; set channel default language
+          smsaspdu=yes
 
           ; or you can omit both audio and data together and use imei=123456789012345 and/or imsi=123456789012345
           ;  imei and imsi must contain exactly 15 digits !
           ;  imei/imsi discovery is available on Linux only
-          ; imei=123456789012345
-          ; imsi=123456789012345
+          ;imei=123456789012345
+          ;imsi=123456789012345
           EOF
 
           rm $out/etc/asterisk/extensions.conf
