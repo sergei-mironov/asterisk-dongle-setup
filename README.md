@@ -16,10 +16,10 @@ Setup
 =====
 
 0. Install [Nix package manager](https://nixos.org/guides/install-nix.html).
-   Note that it could easily co-exist with your native package manager.
+   Note that it could easily co-exist with your native package manager. We use [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/) as base.
 1. `git clone --recursive <this-repo-url> ; cd ...`
-2. Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
-   local nixpkgs. We use [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/) as base.
+2. ~~Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
+   local nixpkgs.~~ (works now with common Asterisk-16)
 3. If the USB dongle is not in modem mode by default, build and use
    `usb_modeswitch`:
    * `nix-build -A usb_modeswitch`.
