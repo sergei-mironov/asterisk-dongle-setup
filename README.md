@@ -20,13 +20,20 @@ Setup
 1. `git clone --recursive <this-repo-url> ; cd ...`
 2. ~~Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
    local nixpkgs.~~ (works now with common Asterisk-16)
-3. If the USB dongle is not in modem mode by default, build and use
+3. If USB dongle is not in its serial mode by default, build and use
    `usb_modeswitch`:
    * `nix-build -A usb_modeswitch`.
-   * `sudo ./result/usr/sbin/usb_modeswitch -v 12d1 -p 1f01 -X` (for E161)
-4. Run the wrapper script `./asterisk.sh`
+   * `lsmod -n` to find out your modem's vendor:product numbers
+   * `sudo ./result/usr/sbin/usb_modeswitch -v <vendor> -p <product> -X`
+   * As a result, `/dec/ttyUSB[01]` devices should appear. You should be able
+     to `minicom -D /dev/ttyUSB0` and type some AT command, say `ATI`.
+   * TODO: Automate the above checks.
+4. Run the wrapper script `./asterisk.sh`. Note that it currently relies on `sudo` to overcome
+   difficulties with chan-dongle's hardcoded paths.
 5. ???
 6. Continue hacking:
+   * See the chan-dongle's [README.md](https://github.com/wdoekes/asterisk-chan-dongle)
+     for supported commands.
    * To send SMS: `dongle sms dongle0 89097777777 HiHi`
    * To receive SMS with `E173`:
      - `dongle cmd dongle0 AT^PORTSEL=1`. TODO: Patch the driver.
@@ -43,12 +50,10 @@ ID           Group State      RSSI Mode Submode Provider Name  Model      Firmwa
 dongle0      0     Free       9    0    0       Beeline        E173       11.126.85.00.209  ***************  ***************  Unknown       
 ```
 
-
 See also [somewhat outdated list of supported devices](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
 
 Issues
 ======
-
 
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
