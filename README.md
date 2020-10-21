@@ -23,7 +23,7 @@ Setup
 3. If USB dongle is not in its serial mode by default, build and use
    `usb_modeswitch`:
    * `nix-build -A usb_modeswitch`.
-   * `lsmod -n` to find out your modem's vendor:product numbers
+   * `lsusb -n` to find out your modem's vendor:product numbers
    * `sudo ./result/usr/sbin/usb_modeswitch -v <vendor> -p <product> -X`
    * As a result, `/dec/ttyUSB[01]` devices should appear. You should be able
      to `minicom -D /dev/ttyUSB0` and type some AT command, say `ATI`.
