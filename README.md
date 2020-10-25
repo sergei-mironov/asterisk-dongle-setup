@@ -8,7 +8,7 @@ In this playground project we try to setup Asterisk server to work with
 The project aims at automating the configuration of software able to solve the following
 tasks:
 
-* Receive SMS messages and re-send them to a messanger bot.
+* Receive SMS messages and re-send them to a messenger.
 * Handle voice calls with voice menu.
 * Handle voice calls with a chat bot.
 
@@ -18,26 +18,45 @@ Setup
 0. Install [Nix package manager](https://nixos.org/guides/install-nix.html).
    Note that it could easily co-exist with your native package manager. We use [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/) as base.
 1. `git clone --recursive <this-repo-url> ; cd ...`
-2. ~~Apply [./0001-asterisk-1.7.patch](./0001-asterisk-1.7.patch) patch to your
-   local nixpkgs.~~ (works now with common Asterisk-16)
-3. If USB dongle is not in its serial mode by default, build and use
-   `usb_modeswitch`:
-   * `nix-build -A usb_modeswitch`.
-   * `lsusb -n` to find out your modem's vendor:product numbers
-   * `sudo ./result/usr/sbin/usb_modeswitch -v <vendor> -p <product> -X`
-   * As a result, `/dec/ttyUSB[01]` devices should appear. You should be able
-     to `minicom -D /dev/ttyUSB0` and type some AT command, say `ATI`.
-   * TODO: Automate the above checks.
-4. Run the wrapper script `./asterisk.sh`. Note that it currently relies on `sudo` to overcome
-   difficulties with chan-dongle's hardcoded paths.
-5. ???
-6. Continue hacking:
+2. Run the wrapper script `./asterisk.sh`.
+   - The script currently relies on `sudo` to overcome difficulties with
+     chan-dongle's hardcoded paths.
+   - Script checks for the presence of `/dev/ttyUSB0` and if it is not present,
+     it attempts to run the `usb_modeswitch` procedure. See below section for
+     details.
+3. ???
+4. Continue hacking:
    * See the chan-dongle's [README.md](https://github.com/wdoekes/asterisk-chan-dongle)
      for supported commands.
    * To send SMS: `dongle sms dongle0 89097777777 HiHi`
    * To receive SMS with `E173`:
      - `dongle cmd dongle0 AT^PORTSEL=1`. TODO: Patch the driver.
      - Send SMS/Call to dongle SIMcard's number
+
+### Doing USB Modeswitch manually
+
+`asterisk.sh` attempts to run usb_modeswitch procedure automatically for devices
+known to author. In case the procedure fails, one could attempt the manual way:
+
+1. `nix-build -A usb_modeswitch`.
+2. `lsusb` to find out your modem's vendor:product numbers
+3. `sudo ./result/usr/sbin/usb_modeswitch -v <vendor> -p <product> -X`
+4. `/dec/ttyUSB[01]` devices should appear. You should be able
+   to `minicom -D /dev/ttyUSB0` and type some AT command, say `ATI`.
+5. Update `asterisk.sh` script by adding new line like below to the
+   corresponding place
+   ```
+   try_to_deal_with "<your_device_id>" "<your_device_vendor>" && wait_for_chardev "/dev/ttyUSB0"
+   ```
+
+### Nix-shell
+
+Author uses VIM as the main development IDE. The start procedure is as follows:
+
+```
+$ nix-shell -A shell  # Provides CCLS executable for C-language-server plugin of VIM
+(nix-shell) $ vim .   # Do the development
+```
 
 Hardware
 ========
@@ -46,8 +65,8 @@ We use the following USB dongle:
 
 ```
 *CLI> dongle show devices
-ID           Group State      RSSI Mode Submode Provider Name  Model      Firmware          IMEI             IMSI             Number        
-dongle0      0     Free       9    0    0       Beeline        E173       11.126.85.00.209  ***************  ***************  Unknown       
+ID           Group State      RSSI Mode Submode Provider Name  Model      Firmware          IMEI             IMSI             Number
+dongle0      0     Free       9    0    0       Beeline        E173       11.126.85.00.209  ***************  ***************  Unknown
 ```
 
 See also [somewhat outdated list of supported devices](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
