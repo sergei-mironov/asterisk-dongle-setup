@@ -10,9 +10,19 @@ let
 
     collection = rec {
 
+      shell = pkgs.mkShell {
+        name = "shell";
+        buildInputs = [
+          pkgs.ccls
+        ];
+      };
+
       asterisk = pkgs.asterisk_16.overrideAttrs (old: rec {
         pname = old.pname + "-tweaked";
-        configureFlags = old.configureFlags ++ ["--disable-xmldoc"];
+
+        configureFlags = old.configureFlags ++ [
+          "--disable-xmldoc"
+        ];
       });
 
       usb_modeswitch = stdenv.mkDerivation {
@@ -99,6 +109,8 @@ let
             cp -R $f $out/etc/asterisk
           done
 
+          sed -i 's@console => notice,warning,error@console => notice,warning,error,debug@g' $out/etc/asterisk/logger.conf
+
           rm $out/etc/asterisk/asterisk.conf
           cat >$out/etc/asterisk/asterisk.conf <<EOF
           [directories]
@@ -116,7 +128,7 @@ let
 
           [options]
           verbose = 9
-          debug = 9
+          debug = 0
           runuser = root		; The user to run as.
           rungroup = root		; The group to run as.
           EOF
