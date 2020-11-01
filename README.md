@@ -30,8 +30,9 @@ Setup
      for supported commands.
    * To send SMS: `dongle sms dongle0 89097777777 HiHi`
    * To receive SMS with `E173`:
-     - `dongle cmd dongle0 AT^PORTSEL=1`. TODO: Patch the driver.
+     - `dongle cmd dongle0 AT^PORTSEL=1`.
      - Send SMS/Call to dongle SIMcard's number
+     - [x] TODO: Patch the driver.
 
 ### Doing USB Modeswitch manually
 
@@ -54,8 +55,9 @@ known to author. In case the procedure fails, one could attempt the manual way:
 Author uses VIM as the main development IDE. The start procedure is as follows:
 
 ```
-$ nix-shell -A shell  # Provides CCLS executable for C-language-server plugin of VIM
-(nix-shell) $ vim .   # Do the development
+$ nix-shell -A shell
+(nix-shell) $ vim .   # Edit sources enjoying code navigaiton
+(nix-shell) $ ipython # Testing telethon bot, etc
 ```
 
 Hardware

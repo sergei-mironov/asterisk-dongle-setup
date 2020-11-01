@@ -10,10 +10,21 @@ let
 
     collection = rec {
 
+      mypyps = ppkgs: with ppkgs; [
+        pandas
+        requests
+        pyst2
+        ipython
+        telethon
+      ];
+
+      mypython = pkgs.python37.withPackages mypyps;
+
       shell = pkgs.mkShell {
         name = "shell";
         buildInputs = [
           pkgs.ccls
+          mypython
         ];
       };
 
@@ -48,15 +59,6 @@ let
           sha256 = "sha256:1kw13g7wldzrnnr9vcm97m4c8pv801hl4fl7q88jvz0q9caz9s07";
         };
       };
-
-      mypyps = ppkgs: with ppkgs; [
-        pandas
-        requests
-        pyst2
-        ipython
-      ];
-
-      mypython = pkgs.python37.withPackages mypyps;
 
       asterisk-chan-dongle = stdenv.mkDerivation {
         name = "asterisk-chan-dongle";
