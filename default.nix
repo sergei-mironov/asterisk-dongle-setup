@@ -26,6 +26,9 @@ let
           pkgs.ccls
           mypython
         ];
+      shellHook = with pkgs; ''
+        export PYTHONPATH=`pwd`/python:$PYTHONPATH
+      '';
       };
 
       asterisk = pkgs.asterisk_16.overrideAttrs (old: rec {
@@ -58,6 +61,16 @@ let
           inherit pname version;
           sha256 = "sha256:1kw13g7wldzrnnr9vcm97m4c8pv801hl4fl7q88jvz0q9caz9s07";
         };
+      };
+
+      telegram_check = python.buildPythonApplication {
+        pname = "telegram_check";
+        version = "1.0";
+        src = ./python;
+        pythonPath = with pkgs.python37Packages; [
+          telethon
+        ];
+        doCheck = false;
       };
 
       asterisk-chan-dongle = stdenv.mkDerivation {
