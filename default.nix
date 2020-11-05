@@ -1,5 +1,7 @@
 { pkgs ? import <nixpkgs> {}
 , stdenv ? pkgs.stdenv
+, telegram_session ? throw "telegram_session argument is required"
+, telegram_secret ? throw "telegram_secret argument is required"
 }:
 
 let
@@ -63,8 +65,8 @@ let
         };
       };
 
-      telegram_check = python.buildPythonApplication {
-        pname = "telegram_check";
+      telegram-scripts = python.buildPythonApplication {
+        pname = "telegram-scripts";
         version = "1.0";
         src = ./python;
         pythonPath = with pkgs.python37Packages; [
@@ -194,7 +196,7 @@ let
           [dongle0]
           data=/dev/ttyUSB0		; tty port for AT commands; 		no default value
           audio=/dev/ttyUSB1		; tty port for audio connection; 	no default value
-          context=dongle-incoming			; context for incoming calls
+          context=dongle	; context for incoming calls
           language=ru			; set channel default language
           smsaspdu=yes
 
@@ -209,8 +211,9 @@ let
           cat >$out/etc/asterisk/extensions.conf <<"EOF"
           [general]
 
-          [dongle-incoming]
-          exten => sms,1,Verbose(Incoming SMS)
+          [dongle]
+          exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
+          exten => sms,n,System(${telegram-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} ''${CALLERID(num)} ''${SMS_BASE64})
           exten => sms,n,Hangup()
           EOF
         '';

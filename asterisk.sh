@@ -2,12 +2,16 @@
 
 set -e -x
 ME=`basename $0`
+TELEGRAM_SESSION="`pwd`/telegram.session"
+TELEGRAM_SECRET=`pwd`/secret.json
 
 # 1. Build required applications
 
 nix-build -A asterisk -o result-asterisk -K
-nix-build -A asterisk-conf -o result-conf
-nix-build -A telegram_check -o result-telegram
+nix-build -A asterisk-conf -o result-conf \
+          --argstr telegram_session "$TELEGRAM_SESSION" \
+          --argstr telegram_secret "$TELEGRAM_SECRET"
+nix-build -A telegram-scripts -o result-telegram
 
 # 2. Prepare the modem. We may need to switch it to the serial mode.
 
@@ -15,7 +19,7 @@ try_to_deal_with() {
   vendor="$1"
   product="$2"
   if lsusb | grep -q "$vendor:$product" ; then
-    sudo ./result-modeswitch/usr/sbin/usb_modeswitch -v "$vendor" -p "$product" -X
+    sudo `pwd`/result-modeswitch/usr/sbin/usb_modeswitch -v "$vendor" -p "$product" -X
     sleep 0.5
     return 0
   else
@@ -28,7 +32,7 @@ wait_for_chardev() {
   ncheck=10
   while ! test -c "$device" ; do
     echo -n .
-    sleep 0.5
+    sleep 1
     ncheck=`expr $ncheck - 1`
     if test "$ncheck" = "0" ; then
       return 1
@@ -48,9 +52,10 @@ fi
 
 # 3. Preparing Telegram session
 
-./result-telegram/bin/telegram_check.py --session=/tmp/test_session.session --secret=secret.json
+`pwd`/result-telegram/bin/telegram_check.py --session="$TELEGRAM_SESSION" \
+                                            --secret="$TELEGRAM_SECRET"
 
-# 4. Run asterisk daemon synchronously, enter CLI
+# 4. Run asterisk daemon synchronously, verbosely, interactively
 
 sudo rm -rf /tmp/asterisk || true
 sudo mkdir /tmp/asterisk

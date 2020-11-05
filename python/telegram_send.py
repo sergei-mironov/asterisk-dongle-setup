@@ -1,20 +1,32 @@
 #!/usr/bin/env python3
-import base64
-import sys
-import codecs
+from base64 import b64decode
+from sys import argv
+from asyncio import get_event_loop
+from telethon import TelegramClient
+from json import load as json_load
 
-session = sys.argv[1]
-phone = sys.argv[2]
-message = base64.b64decode(sys.argv[3]).decode('utf-8')
+session = argv[1]
+secret = argv[2]
+time = argv[3]
+device = argv[4]
+phone = argv[5]
+message = b64decode(argv[6]).decode('utf-8')
 
 if session.endswith('.session'):
-  session = args.session[:(len(session)-len('.session'))]
+  session = session[:(len(session)-len('.session'))]
 
-print(f"SMS from: {phone}: {message}")
+with open(secret, 'r') as f:
+  secret=json_load(f)
+telegram_api_id = secret['telegram_api_id']
+telegram_api_hash = secret['telegram_api_hash']
 
 async def main():
-  client = TelegramClient(session=args.session).start()
-  # TODO
+  client = TelegramClient(session=session,
+                          api_id=telegram_api_id,
+                          api_hash=telegram_api_hash)
+  def _input_stub():
+    raise RuntimeError("This script is not supposed to be interactive")
+  await client.start(code_callback=_input_stub)
+  await client.send_message('me', f"SMS from {phone}: {message}")
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+get_event_loop().run_until_complete(main())
