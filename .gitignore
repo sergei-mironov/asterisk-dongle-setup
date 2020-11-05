@@ -4,3 +4,4 @@ a.out
 secret.nix
 secret.py
 secret.json
+*.pyc
