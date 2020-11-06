@@ -1,9 +1,16 @@
 #!/bin/sh
 
-set -e -x
 ME=`basename $0`
 TELEGRAM_SESSION="`pwd`/telegram.session"
 TELEGRAM_SECRET=`pwd`/secret.json
+
+if ! test -f "$TELEGRAM_SECRET" ; then
+  echo "\`$TELEGRAM_SECRET' not found. This file is required for Telegram client "
+  echo "to work. Consider copying and filling the \`./secret_example.json'"
+  exit 1
+fi
+
+set -e -x
 
 # 1. Build required applications
 

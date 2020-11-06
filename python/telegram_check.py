@@ -44,6 +44,10 @@ async def main():
                           api_id=telegram_api_id,
                           api_hash=telegram_api_hash)
   await client.start(phone=telegram_phone)
+  dialogs = await client.get_dialogs()
+  print("Dialogs")
+  for d in dialogs:
+    print(f"{d.id}: {d.title}")
   print('OK')
 
 loop = asyncio.get_event_loop()
