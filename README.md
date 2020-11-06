@@ -5,10 +5,10 @@ In this playground project we try to setup Asterisk server to work with
 [GSM-modem dongle](https://github.com/wdoekes/asterisk-chan-dongle) using
 [Nix](https://nixos.org) package manager.
 
-The project aims at automating the configuration of software able to solve the following
-tasks:
+The project aims at automating the configuration of software able to solve the
+following tasks:
 
-* [x] Receive SMS messages and re-send them to a Telegram chat.
+* [x] Receive SMS messages and forward them to a Telegram chat.
 * [ ] Handle voice calls with voice menu.
 * [ ] Handle voice calls with a chat bot.
 
@@ -16,7 +16,9 @@ Setup
 =====
 
 0. Install [Nix package manager](https://nixos.org/guides/install-nix.html).
-   Note that it could easily co-exist with your native package manager. We use [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/) as base.
+   Note that it could easily co-exist with your native package manager. We use
+   [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/)
+   as a base.
 1. `git clone --recursive <this-repo-url> ; cd ...`
 2. Create `./secret.json` file for Telegram by copying and editing
    `./secret_example.json`.
@@ -92,13 +94,15 @@ Issues
 
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
+* ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/121~~
 * https://github.com/wdoekes/asterisk-chan-dongle/issues/120
 * https://community.asterisk.org/t/receive-sms-using-chan-dongle/86097
-* https://github.com/wdoekes/asterisk-chan-dongle/issues/121
 
 
 References
 ==========
+
+**GSM modem**
 
 * GSMCTL https://www.unix.com/man-page/debian/8/gsmctl/
   - Homepage looks inactive
@@ -107,4 +111,9 @@ References
   http://linux.mixed-spb.ru/asterisk/dongle_app1.php
 * Another Dongle guide in Russian
   https://jakondo.ru/podklyuchenie-gsm-modema-usb-huawei-e1550-k-asterisk-13-chan_dongle-na-debian-8-jessie/
+
+**Telegram**
+
+* Telegram API management https://my.telegram.org/auth
+* Telethon API client documentation https://docs.telethon.dev/en/latest/
 
