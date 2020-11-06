@@ -23,8 +23,8 @@ Setup
 2. Create `./secret.json` file for Telegram by copying and editing
    `./secret_example.json`.
    - You need a mobile phone which is bound to some Telegram account.
-   - Go to https://my.telegram.org/auth and register the API Client. There you
-     will be provided with `api_id` and `api_hash` values.
+   - Go to https://my.telegram.org/auth and register an API Client instance.
+     You will be provided with `api_id` and `api_hash` values.
    - Bot token field is not currently used.
    - Chat id is a (typically negative) identifier of a chat to send SMS messages
      to. `./asterisk.sh` will print available chat identifiers of a client at
@@ -114,6 +114,6 @@ References
 
 **Telegram**
 
-* Telegram API management https://my.telegram.org/auth
+* Client API access page https://my.telegram.org/auth
 * Telethon API client documentation https://docs.telethon.dev/en/latest/
 
