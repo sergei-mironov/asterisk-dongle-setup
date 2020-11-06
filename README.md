@@ -8,9 +8,9 @@ In this playground project we try to setup Asterisk server to work with
 The project aims at automating the configuration of software able to solve the following
 tasks:
 
-* Receive SMS messages and re-send them to a messenger.
-* Handle voice calls with voice menu.
-* Handle voice calls with a chat bot.
+* [x] Receive SMS messages and re-send them to a Telegram chat.
+* [ ] Handle voice calls with voice menu.
+* [ ] Handle voice calls with a chat bot.
 
 Setup
 =====
@@ -18,17 +18,31 @@ Setup
 0. Install [Nix package manager](https://nixos.org/guides/install-nix.html).
    Note that it could easily co-exist with your native package manager. We use [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/) as base.
 1. `git clone --recursive <this-repo-url> ; cd ...`
-2. Run the wrapper script `./asterisk.sh`.
+2. Create `./secret.json` file for Telegram by copying and editing
+   `./secret_example.json`.
+   - You need a mobile phone which is bound to some Telegram account.
+   - Go to https://my.telegram.org/auth and register the API Client. There you
+     will be provided with `api_id` and `api_hash` values.
+   - Bot token field is not currently used.
+   - Chat id is a (typically negative) identifier of a chat to send SMS messages
+     to. `./asterisk.sh` will print available chat identifiers of a client at
+     some point.
+3. Setup the GSM Modem
+   - See the chan-dongle's [README.md](https://github.com/wdoekes/asterisk-chan-dongle)
+     for supported commands.
+   - `./asterisk.sh` below will check for the presence of `/dev/ttyUSB0`. If it
+     is not present, the script would attempt to run the `usb_modeswitch`
+     procedure. But only a small number of devices (currently, 1) is encoded,
+     so an update may be required. See below section for details.
+4. Run the main script `./asterisk.sh`.
    - The script currently relies on `sudo` to overcome difficulties with
      chan-dongle's hardcoded paths.
-   - Script checks for the presence of `/dev/ttyUSB0` and if it is not present,
-     it attempts to run the `usb_modeswitch` procedure. See below section for
-     details.
-3. ???
-4. Continue hacking:
-   * See the chan-dongle's [README.md](https://github.com/wdoekes/asterisk-chan-dongle)
-     for supported commands.
-   * To send SMS: `dongle sms dongle0 89097777777 HiHi`
+   - Script initializes Telegram session. As a part of initialization, Telegram
+     server will send a digital code to your Telegram application. You are to
+     type this code back into the script.
+5. ???
+6. Do some hacking:
+   * To send SMS from the GSM modem, do: `dongle sms dongle0 89097777777 HiHi`
    * To receive SMS with `E173`:
      - `dongle cmd dongle0 AT^PORTSEL=1`.
      - Send SMS/Call to dongle SIMcard's number
