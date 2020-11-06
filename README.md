@@ -29,10 +29,14 @@ Setup
    - Chat id is a (typically negative) identifier of a chat to send SMS messages
      to. `./asterisk.sh` will print available chat identifiers of a client at
      some point.
-3. Setup the GSM Modem
-   - See the chan-dongle's [README.md](https://github.com/wdoekes/asterisk-chan-dongle)
-     for supported commands.
-   - `./asterisk.sh` below will check for the presence of `/dev/ttyUSB0`. If it
+3. Setup the GSM Modem. You need to get a supported GSM modem and plug it into
+   USB port of your computer.
+   - See the chan-dongle's
+     [README.md](https://github.com/wdoekes/asterisk-chan-dongle) for
+     information about the supported hardware. Some outdated document is also
+     available
+     [here](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
+   - `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If it
      is not present, the script would attempt to run the `usb_modeswitch`
      procedure. But only a small number of devices (currently, 1) is encoded,
      so an update may be required. See below section for details.
