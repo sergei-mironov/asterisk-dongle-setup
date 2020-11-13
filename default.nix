@@ -75,6 +75,16 @@ let
         doCheck = false;
       };
 
+      lenny-sound-files = stdenv.mkDerivation {
+        name = "lenny-sound-files";
+        buildCommand = ''
+          mkdir -pv $out
+          cp -R ${./app/lenny/sound}/* $out
+        '';
+      };
+
+      sound-files = lenny-sound-files;
+
       asterisk-chan-dongle = stdenv.mkDerivation {
         name = "asterisk-chan-dongle";
 
@@ -181,10 +191,10 @@ let
                               ; if 'no' waiting calls just ignored
           disable=no			; OBSOLETED by initstate: if 'yes' no load this device and just ignore this section
 
-          initstate=start			; specified initial state of device, must be one of 'stop' 'start' 'remote'
-                              ;   'remove' same as 'disable=yes'
+          initstate=start	; specified initial state of device, must be one of 'stop' 'start' 'remote'
+                          ;   'remove' same as 'disable=yes'
 
-          exten=+1234567890		; exten for start incoming calls, only in case of Subscriber Number not available!, also set to CALLERID(ndid)
+          exten=talk		  ; exten for start incoming calls, only in case of Subscriber Number not available!, also set to CALLERID(ndid)
 
           dtmf=relax			; control of incoming DTMF detection, possible values:
                           ;   off	   - off DTMF tones detection, voice data passed to asterisk unaltered
@@ -215,6 +225,16 @@ let
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
           exten => sms,n,System(${telegram-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} ''${CALLERID(num)} ''${SMS_BASE64})
           exten => sms,n,Hangup()
+
+          exten => talk,1,Answer()
+          same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,Playback(${lenny-sound-files}/Lenny1)
+          same => n,Hangup()
+
+          ; exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
+          ; same => n,GotoIf($["''${i}" = "4"]?dongle,0000,1)
+          ; same => n,Playback(berry/snd-''${i})
+          ; same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise},1000)
           EOF
         '';
       };

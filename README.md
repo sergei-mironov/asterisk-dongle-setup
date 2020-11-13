@@ -106,6 +106,10 @@ Issues
 References
 ==========
 
+**Asterisk**
+
+* Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
+
 **GSM modem**
 
 * GSMCTL https://www.unix.com/man-page/debian/8/gsmctl/
@@ -121,3 +125,6 @@ References
 * Client API access page https://my.telegram.org/auth
 * Telethon API client documentation https://docs.telethon.dev/en/latest/
 
+**Fun**
+
+* Lenny https://crosstalksolutions.com/howto-pwn-telemarketers-with-lenny/
