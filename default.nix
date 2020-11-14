@@ -227,29 +227,31 @@ let
 
           [dongle]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
-          exten => sms,n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message-base64=''${SMS_BASE64})
-          exten => sms,n,Hangup()
+          same => n,Set(MSG=--message-base64=''${SMS_BASE64})
+          same => n,Hangup()
 
           ; exten => talk,1,Answer()
           ; same => n,Playback(${lenny-sound-files}/Lenny1)
           ; same => n,Hangup()
+          ; same => n,GotoIf($["''${i}" = "16"]?dongle,h,1)
 
           exten => voice,1,Answer()
           same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
           same => n,Goto(dongle,talk,1)
 
           exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
-          same => n,GotoIf($["''${i}" = "16"]?dongle,h,1)
           same => n,Playback(${lenny-sound-files}/Lenny''${i})
-          same => n,backgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
+          same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
           EOF
         '';
       };
     };
   };
 
+          # ; same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message-base64=''${SMS_BASE64})
 in
   local.collection
