@@ -230,11 +230,6 @@ let
           same => n,Set(MSG=--message-base64=''${SMS_BASE64})
           same => n,Hangup()
 
-          ; exten => talk,1,Answer()
-          ; same => n,Playback(${lenny-sound-files}/Lenny1)
-          ; same => n,Hangup()
-          ; same => n,GotoIf($["''${i}" = "16"]?dongle,h,1)
-
           exten => voice,1,Answer()
           same => n,Monitor(wav,''${UNIQUEID},m)
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")

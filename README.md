@@ -124,6 +124,7 @@ References
 
 * Client API access page https://my.telegram.org/auth
 * Telethon API client documentation https://docs.telethon.dev/en/latest/
+* Setting up TG2SIP (In Russian) https://voxlink.ru/kb/asterisk-configuration/ustanovka-i-nastrojka-sip-shljuza-dlja-telegram/
 
 **Fun**
 
