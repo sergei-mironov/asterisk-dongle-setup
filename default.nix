@@ -12,6 +12,8 @@ let
 
     collection = rec {
 
+      inherit (pkgs) sox;
+
       mypyps = ppkgs: with ppkgs; [
         pandas
         requests
@@ -65,8 +67,8 @@ let
         };
       };
 
-      telegram-scripts = python.buildPythonApplication {
-        pname = "telegram-scripts";
+      python-scripts = python.buildPythonApplication {
+        pname = "python-scripts";
         version = "1.0";
         src = ./python;
         pythonPath = with pkgs.python37Packages; [
@@ -127,6 +129,8 @@ let
 
 
 
+      asterisk-tmp = "/tmp/asterisk";
+
       asterisk-conf = stdenv.mkDerivation {
         name = "asterisk-conf";
         buildCommand = ''
@@ -144,13 +148,13 @@ let
           astetcdir => $out/etc/asterisk
           astmoddir => ${asterisk-modules}
           astvarlibdir => ${asterisk}/var/lib/asterisk
-          astdbdir => /tmp/asterisk
+          astdbdir => ${asterisk-tmp}
           astkeydir => ${asterisk}/var/lib/asterisk
           astdatadir => ${asterisk}/var/lib/asterisk
           astagidir => ${asterisk}/var/lib/asterisk/agi-bin
-          astspooldir => /tmp/asterisk
-          astrundir => /tmp/asterisk/
-          astlogdir => /tmp/asterisk/
+          astspooldir => ${asterisk-tmp}
+          astrundir => ${asterisk-tmp}
+          astlogdir => ${asterisk-tmp}
           astsbindir => ${asterisk}/sbin
 
           [options]
@@ -223,12 +227,14 @@ let
 
           [dongle]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
-          exten => sms,n,System(${telegram-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} ''${CALLERID(num)} ''${SMS_BASE64})
+          exten => sms,n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message-base64=''${SMS_BASE64})
           exten => sms,n,Hangup()
 
           exten => talk,1,Answer()
           same => n,Monitor(wav,''${UNIQUEID},m)
           same => n,Playback(${lenny-sound-files}/Lenny1)
+          same => n,StopMonitor()
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
           same => n,Hangup()
 
           ; exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})

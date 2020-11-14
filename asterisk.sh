@@ -14,11 +14,15 @@ set -e -x
 
 # 1. Build required applications
 
+nix-build -A sox -o result-sox
+export PATH=`readlink ./result-sox`/bin/:$PATH
+sox --version
+
 nix-build -A asterisk -o result-asterisk -K
 nix-build -A asterisk-conf -o result-conf \
           --argstr telegram_session "$TELEGRAM_SESSION" \
           --argstr telegram_secret "$TELEGRAM_SECRET"
-nix-build -A telegram-scripts -o result-telegram
+nix-build -A python-scripts -o result-python
 
 # 2. Prepare the modem. We may need to switch it to the serial mode.
 
@@ -59,7 +63,7 @@ fi
 
 # 3. Preparing Telegram session
 
-`pwd`/result-telegram/bin/telegram_check.py --session="$TELEGRAM_SESSION" \
+`pwd`/result-python/bin/telegram_check.py --session="$TELEGRAM_SESSION" \
                                             --secret="$TELEGRAM_SECRET"
 
 # 4. Run asterisk daemon synchronously, verbosely, interactively
