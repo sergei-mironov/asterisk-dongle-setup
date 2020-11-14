@@ -5,12 +5,13 @@ from asyncio import get_event_loop
 from telethon import TelegramClient
 from json import load as json_load
 from argparse import ArgumentParser
+from os.path import isfile
 
 NARGS=4
 parser = ArgumentParser(description='Simple messaging client for Telegram.')
 parser.add_argument('positionals', nargs=NARGS,
                     help='SESSION SECRET TIME DEVICE')
-parser.add_argument('--attach-voice', nargs=1, type=str, metavar='PATH',
+parser.add_argument('--attach-voice', type=str, metavar='PATH',
                     help='File to attach', default=None)
 parser.add_argument('--message-base64', type=str, metavar='TEXT',
                     help='Base64-encoded message', default=None)
@@ -56,9 +57,13 @@ async def main():
     raise RuntimeError("This script is not supposed to be interactive")
   await client.start(code_callback=_input_stub)
   if args.attach_voice is not None:
-    await client.send_file(telegram_chat_id, args.attach_voice,
-                           voice_note=True,
-                           caption=fulltext)
+    if not isfile(args.attach_voice):
+      await client.send_message(telegram_chat_id,
+                                f"Error: {args.attach_voice} is not a file")
+    else:
+      await client.send_file(telegram_chat_id, args.attach_voice,
+                             voice_note=True,
+                             caption=fulltext)
   elif message is not None:
     await client.send_message(telegram_chat_id, fulltext)
   else:

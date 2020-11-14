@@ -198,7 +198,7 @@ let
           initstate=start	; specified initial state of device, must be one of 'stop' 'start' 'remote'
                           ;   'remove' same as 'disable=yes'
 
-          exten=talk		  ; exten for start incoming calls, only in case of Subscriber Number not available!, also set to CALLERID(ndid)
+          exten=voice		  ; exten for start incoming calls, only in case of Subscriber Number not available!, also set to CALLERID(ndid)
 
           dtmf=relax			; control of incoming DTMF detection, possible values:
                           ;   off	   - off DTMF tones detection, voice data passed to asterisk unaltered
@@ -230,21 +230,24 @@ let
           exten => sms,n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message-base64=''${SMS_BASE64})
           exten => sms,n,Hangup()
 
-          exten => talk,1,Answer()
-          same => n,Monitor(wav,''${UNIQUEID},m)
-          same => n,Playback(${lenny-sound-files}/Lenny1)
-          same => n,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
-          same => n,Hangup()
+          ; exten => talk,1,Answer()
+          ; same => n,Playback(${lenny-sound-files}/Lenny1)
+          ; same => n,Hangup()
 
-          ; exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
-          ; same => n,GotoIf($["''${i}" = "4"]?dongle,0000,1)
-          ; same => n,Playback(berry/snd-''${i})
-          ; same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise},1000)
+          exten => voice,1,Answer()
+          same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,Goto(dongle,talk,1)
+
+          exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
+          same => n,GotoIf($["''${i}" = "16"]?dongle,h,1)
+          same => n,Playback(${lenny-sound-files}/Lenny''${i})
+          same => n,backgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
+
+          exten => h,1,StopMonitor()
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
           EOF
         '';
       };
-
     };
   };
 
