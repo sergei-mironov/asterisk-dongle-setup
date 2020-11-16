@@ -67,6 +67,43 @@ let
         };
       };
 
+      tdlib_160 = stdenv.mkDerivation rec {
+        version = "1.6.0";
+        pname = "tdlib";
+
+        src = pkgs.fetchFromGitHub {
+          owner = "tdlib";
+          repo = "td";
+          rev = "v${version}";
+          sha256 = "0zlzpl6fgszg18kwycyyyrnkm255dvc6fkq0b0y32m5wvwwl36cv";
+        };
+
+        buildInputs = with pkgs; [ gperf openssl readline zlib ];
+        nativeBuildInputs = with pkgs; [ cmake ];
+      };
+
+      tg2sip = stdenv.mkDerivation rec {
+        name = "tg2sip";
+        version = "1.2.0";
+
+        buildInputs = with pkgs; [
+          openssl libopus.dev pkgconfig cmake asterisk pjsip spdlog_0 tdlib_160
+          alsaLib
+        ];
+
+        # makeFlags = ["-j30"];
+
+        installPhase = ''
+          mkdir -pv $out/bin
+          cp -v tg2sip gen_db $out/bin
+        '';
+
+        src = pkgs.fetchurl {
+          url = "https://github.com/Infactum/${name}/archive/v${version}.tar.gz";
+          sha256 = "sha256:0j7bmgzk6aic4kzqs46s4azjmg1vgykvw5vjncsy6s5z2fdp8iia";
+        };
+      };
+
       python-scripts = python.buildPythonApplication {
         pname = "python-scripts";
         version = "1.0";
