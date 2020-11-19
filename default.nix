@@ -12,7 +12,8 @@ let
 
     collection = rec {
 
-      inherit (pkgs) sox;
+      inherit pkgs;
+      inherit (pkgs) sox yate;
 
       mypyps = ppkgs: with ppkgs; [
         pandas
@@ -245,24 +246,18 @@ let
                           ;  default is 'relax' by compatibility reason
 
           [dongle0]
-          data=/dev/ttyUSB0		; tty port for AT commands; 		no default value
-          audio=/dev/ttyUSB1		; tty port for audio connection; 	no default value
-          context=dongle	; context for incoming calls
-          language=ru			; set channel default language
+          data=/dev/ttyUSB0
+          audio=/dev/ttyUSB1
+          context=dongle-lenny
+          language=ru
           smsaspdu=yes
-
-          ; or you can omit both audio and data together and use imei=123456789012345 and/or imsi=123456789012345
-          ;  imei and imsi must contain exactly 15 digits !
-          ;  imei/imsi discovery is available on Linux only
-          ;imei=123456789012345
-          ;imsi=123456789012345
           EOF
 
           rm $out/etc/asterisk/extensions.conf
           cat >$out/etc/asterisk/extensions.conf <<"EOF"
           [general]
 
-          [dongle]
+          [dongle-lenny]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
           same => n,Set(MSG=--message-base64=''${SMS_BASE64})
           same => n,Hangup()
@@ -278,6 +273,45 @@ let
 
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+
+          [dongle-forward]
+          exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
+          same => n,Set(MSG=--message-base64=''${SMS_BASE64})
+          same => n,Hangup()
+
+          exten => voice,1,Answer()
+          same => n,Dial(PJSIP/alice-softphone)
+          same => n,Hangup()
+
+          exten => h,1,StopMonitor()
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          EOF
+
+
+          rm $out/etc/asterisk/pjsip.conf
+          cat >$out/etc/asterisk/pjsip.conf <<EOF
+          [transport-udp]
+          type=transport
+          protocol=udp
+          bind=127.0.0.1
+
+          [alice-softphone]
+          type=endpoint
+          context=pjsip-incoming
+          disallow=all
+          allow=ulaw
+          auth=alice-auth
+          aors=alice-softphone
+
+          [alice-auth]
+          type=auth
+          auth_type=userpass
+          username=alice-softphone
+          password=Secret123
+
+          [alice-softphone]
+          type=aor
+          max_contacts=1
           EOF
         '';
       };

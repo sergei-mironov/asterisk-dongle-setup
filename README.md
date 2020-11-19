@@ -109,6 +109,7 @@ References
 **Asterisk**
 
 * Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
+* An article about PJSIP configuration https://www.redhat.com/sysadmin/asterisk-dialplan
 
 **GSM modem**
 
