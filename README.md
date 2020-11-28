@@ -101,6 +101,7 @@ Issues
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/121~~
 * https://github.com/wdoekes/asterisk-chan-dongle/issues/120
 * https://community.asterisk.org/t/receive-sms-using-chan-dongle/86097
+* https://github.com/Infactum/tg2sip/issues/42
 
 
 References
