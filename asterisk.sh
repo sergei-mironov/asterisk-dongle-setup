@@ -23,6 +23,8 @@ nix-build -A asterisk-conf -o result-conf \
           --argstr telegram_session "$TELEGRAM_SESSION" \
           --argstr telegram_secret "$TELEGRAM_SECRET"
 nix-build -A python-scripts -o result-python
+nix-build -A tg2sip -o result-tg2sip
+nix-build -A tg2sip-conf -o result-tg2sip-conf
 
 # 2. Prepare the modem. We may need to switch it to the serial mode.
 
@@ -66,7 +68,13 @@ fi
 `pwd`/result-python/bin/telegram_check.py --session="$TELEGRAM_SESSION" \
                                             --secret="$TELEGRAM_SECRET"
 
+#FIXME: call <tg2sip>/bin/gen_db
+
 # 4. Run asterisk daemon synchronously, verbosely, interactively
+
+# FIXME: enable
+# cp ./result-tg2sip-conf/etc/settings.ini settings.ini
+# ./result-tg2sip/bin/tg2sip
 
 sudo rm -rf /tmp/asterisk || true
 sudo mkdir /tmp/asterisk

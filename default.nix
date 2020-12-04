@@ -210,7 +210,6 @@ let
           ;csmsttl=5
 
           [defaults]
-          context=dongle-incoming			; context for incoming calls
           group=0				; calling group
           rxgain=0			; increase the incoming volume; may be negative
           txgain=0			; increase the outgoint volume; may be negative
@@ -248,7 +247,7 @@ let
           [dongle0]
           data=/dev/ttyUSB0
           audio=/dev/ttyUSB1
-          context=dongle-lenny
+          context=dongle-incoming-tg
           language=ru
           smsaspdu=yes
           EOF
@@ -257,7 +256,9 @@ let
           cat >$out/etc/asterisk/extensions.conf <<"EOF"
           [general]
 
-          [dongle-lenny]
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [dongle-incoming-lenny]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
           same => n,Set(MSG=--message-base64=''${SMS_BASE64})
           same => n,Hangup()
@@ -274,13 +275,29 @@ let
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
-          [dongle-forward]
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [dongle-incoming-alice]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
           same => n,Set(MSG=--message-base64=''${SMS_BASE64})
           same => n,Hangup()
 
           exten => voice,1,Answer()
           same => n,Dial(PJSIP/alice-softphone)
+          same => n,Hangup()
+
+          exten => h,1,StopMonitor()
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [dongle-incoming-tg]
+          exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
+          same => n,Set(MSG=--message-base64=''${SMS_BASE64})
+          same => n,Hangup()
+
+          exten => voice,1,Answer()
+          same => n,Dial(PJSIP/+79096722988@127.0.0.1:5062) # FIXME
           same => n,Hangup()
 
           exten => h,1,StopMonitor()
@@ -294,6 +311,8 @@ let
           type=transport
           protocol=udp
           bind=127.0.0.1
+
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
           [alice-softphone]
           type=endpoint
@@ -312,9 +331,97 @@ let
           [alice-softphone]
           type=aor
           max_contacts=1
+
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [telegram-softphone]
+          type=endpoint
+          context=telegram-incoming
+          disallow=all
+          allow=ulaw
+          auth=telegram-auth
+          aors=telegram-softphone
+
+          [telegram-auth]
+          type=auth
+          auth_type=userpass
+          username=telegram-softphone
+          password=123
+
+          [telegram-softphone]
+          type=aor
+          max_contacts=1
+
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [telegram]
+          deny=0.0.0.0/0.0.0.0
+          type=peer
+          nat=no
+          qualify=yes
+          permit=127.0.0.1/255.255.255.255
+          host=127.0.0.1
+          port=5062
+          fromdomain=127.0.0.1
+          insecure=port,invite
+          canreinvite=no
+          dtmfmode=rfc2833
+          disallow=all
+          allow=opus
+          context=telegram-incoming
           EOF
         '';
       };
+
+      tg2sip-conf = pkgs.writeTextDir "etc/settings.ini" ''
+        [logging]
+        core=1                 ; 0-trace  2-info  4-err   6-off
+                               ; 1-debug  3-warn  5-crit
+
+        tgvoip=5               ; same as core
+        pjsip=2                ; same as core
+        sip_messages=true      ; log sip messages if pjsip debug is enabled
+
+        console_min_level=0    ; minimal log level that will be written into console
+        file_min_level=0       ; same but into file
+
+        ;tdlib=3                ; TDLib is written to file only and has its own log level values
+                                ; not affected by other log settings
+                                ; 0-fatal   2-warnings  4-debug
+                                ; 1-errors  3-info      5-verbose debug
+
+        [sip]
+        public_address=127.0.0.1
+        port=5062
+        ;port_range=0           ; Specify the port range for socket binding, relative to the start
+                                ; port number specified in port.
+        id_uri=sip:telegram@127.0.0.1
+                                ; The Address of Record or AOR, that is full SIP URL that identifies the account.
+                                ; The value can take name address or URL format, and will look something
+                                ; like "sip:account@serviceprovider".
+
+        callback_uri=sip:telegram@127.0.0.1:5060 ; FIXME: unhardcode the port
+                                ; SIP URI for TG->SIP incoming calls processing
+
+        raw_pcm=false           ; use L16@48k codec if true or OPUS@48k otherwise
+                                ; keep true for lower CPU consumption
+
+        ;thread_count=1         ; Specify the number of worker threads to handle incoming RTP
+                                ; packets. A value of one is recommended for most applications.
+
+        [telegram]
+        api_id=2631010 ; FIXME: Application identifier for Telegram API access
+        api_hash=899a7e59e30e2be5a55cbb488984a1eb ; FIXME: Application identifier hash for Telegram API access
+                                                  ; which can be obtained at https://my.telegram.org.
+
+        system_language_code=ru-RU      ; IETF language tag of the user's operating system language
+
+        [other]
+        extra_wait_time=10             ; If gateway gets temporary blocked with "Too Many Requests" reason,
+                                       ; then block all outgoing telegram requests for X more seconds than was
+                                       ; requested by server
+        ;peer_flood_time=86400         ; Seconds to wait on PEER_FLOOD
+      '';
     };
   };
 
