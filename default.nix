@@ -265,7 +265,7 @@ let
           exten => voice,1,Answer()
           same => n,Monitor(wav,''${UNIQUEID},m)
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
-          same => n,Goto(dongle,talk,1)
+          same => n,Goto(dongle-lenny,talk,1)
 
           exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
           same => n,Playback(${lenny-sound-files}/Lenny''${i})
