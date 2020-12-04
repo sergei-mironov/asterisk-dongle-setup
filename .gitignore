@@ -6,3 +6,5 @@ secret.py
 secret.json
 *.pyc
 telegram.session
+tg2sip*
+pjproject*
