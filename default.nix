@@ -266,7 +266,7 @@ let
           exten => voice,1,Answer()
           same => n,Monitor(wav,''${UNIQUEID},m)
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
-          same => n,Goto(dongle-lenny,talk,1)
+          same => n,Goto(dongle-incoming-lenny,talk,1)
 
           exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
           same => n,Playback(${lenny-sound-files}/Lenny''${i})
@@ -297,11 +297,18 @@ let
           same => n,Hangup()
 
           exten => voice,1,Answer()
-          same => n,Dial(PJSIP/+79096722988@127.0.0.1:5062) # FIXME
+          same => n,Dial(PJSIP/telegram-endpoint)
           same => n,Hangup()
 
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [telegram-incoming-test]
+          exten => sms,1,Verbose(Incoming from telegram)
+          same => n,Hangup()
+
           EOF
 
 
@@ -334,41 +341,23 @@ let
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-          [telegram-softphone]
+          [telegram-endpoint]
           type=endpoint
-          context=telegram-incoming
+          context=telegram-incoming-test
           disallow=all
-          allow=ulaw
+          allow=opus
           auth=telegram-auth
-          aors=telegram-softphone
+          aors=telegram-aors
 
           [telegram-auth]
           type=auth
           auth_type=userpass
-          username=telegram-softphone
+          username=telegram  ; Is it for inbound or outbound registrations?
           password=123
 
-          [telegram-softphone]
+          [telegram-aors]
           type=aor
-          max_contacts=1
-
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-          [telegram]
-          deny=0.0.0.0/0.0.0.0
-          type=peer
-          nat=no
-          qualify=yes
-          permit=127.0.0.1/255.255.255.255
-          host=127.0.0.1
-          port=5062
-          fromdomain=127.0.0.1
-          insecure=port,invite
-          canreinvite=no
-          dtmfmode=rfc2833
-          disallow=all
-          allow=opus
-          context=telegram-incoming
+          contact=sip:telegram@127.0.0.1:5062
           EOF
         '';
       };
@@ -379,7 +368,7 @@ let
                                ; 1-debug  3-warn  5-crit
 
         tgvoip=5               ; same as core
-        pjsip=2                ; same as core
+        pjsip=0                ; same as core
         sip_messages=true      ; log sip messages if pjsip debug is enabled
 
         console_min_level=0    ; minimal log level that will be written into console

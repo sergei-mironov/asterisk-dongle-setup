@@ -100,8 +100,8 @@ Issues
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/121~~
 * https://github.com/wdoekes/asterisk-chan-dongle/issues/120
-* https://community.asterisk.org/t/receive-sms-using-chan-dongle/86097
 * https://github.com/Infactum/tg2sip/issues/42
+* https://community.asterisk.org/t/help-translating-a-simple-peer-config-to-pjsip/86601
 
 
 References
@@ -111,6 +111,7 @@ References
 
 * Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
 * An article about PJSIP configuration https://www.redhat.com/sysadmin/asterisk-dialplan
+* https://wiki.asterisk.org/wiki/display/AST/PJSIP+Configuration+Sections+and+Relationships
 
 **GSM modem**
 
@@ -126,6 +127,7 @@ References
 
 * Client API access page https://my.telegram.org/auth
 * Telethon API client documentation https://docs.telethon.dev/en/latest/
+* TG2SIP https://github.com/Infactum/tg2sip
 * Setting up TG2SIP (In Russian) https://voxlink.ru/kb/asterisk-configuration/ustanovka-i-nastrojka-sip-shljuza-dlja-telegram/
 
 **Fun**
