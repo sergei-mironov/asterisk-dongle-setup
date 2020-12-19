@@ -1,10 +1,12 @@
 { pkgs ? import <nixpkgs> {}
 , stdenv ? pkgs.stdenv
-, telegram_session ? throw "telegram_session argument is required"
-, telegram_secret ? throw "telegram_secret argument is required"
+, secrets ? import ./secrets.nix
+, telegram_session ? throw "Please specify path to telegram session file"
 }:
 
 let
+  inherit (secrets) telegram_master_nicname;
+
   python = pkgs.python37Packages;
 
   local = rec {
@@ -35,6 +37,18 @@ let
         export PYTHONPATH=`pwd`/python:$PYTHONPATH
       '';
       };
+
+      # FIXME: Remove boilerplate
+      # FIXME: Here all the secrets go to the /nix/store :(
+      python_secrets_json = pkgs.writeText "python_secrets.json"
+        (with secrets; ''
+        { "telegram_app_title":"${telegram_app_title}"
+        , "telegram_api_id":${toString telegram_api_id}
+        , "telegram_api_hash":"${telegram_api_hash}"
+        , "telegram_bot_token":"${telegram_bot_token}"
+        , "telegram_phone":"${telegram_phone}"
+        , "telegram_chat_id":${toString telegram_chat_id}
+        }'');
 
       # FIXME: Toxic binary component! Get rid of it ASAP!
       codec_opus = stdenv.mkDerivation rec {
@@ -101,6 +115,12 @@ let
       pjsip = pkgs.pjsip.overrideAttrs (old: rec {
         pname = old.pname + "+opus";
         buildInputs = old.buildInputs ++ [ pkgs.libopus.dev ];
+        configureFlags = [ "--disable-sound" "CFLAGS=-O3" ];
+        preBuild = ''
+          mkdir tg2sip-src
+          ${pkgs.atool}/bin/aunpack --extract-to=tg2sip-src ${tg2sip.src}
+          cp tg2sip-src/tg2sip*/buildenv/config_site.h pjlib/include/pj/config_site.h
+        '';
       });
 
       tg2sip = stdenv.mkDerivation rec {
@@ -111,8 +131,6 @@ let
           openssl libopus.dev pkgconfig cmake pjsip spdlog_0 tdlib_160
           alsaLib
         ];
-
-        # makeFlags = ["-j30"];
 
         installPhase = ''
           mkdir -pv $out/bin
@@ -338,21 +356,7 @@ let
           same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
-
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-          [dongle-incoming-alice]
-          exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
-          same => n,Set(MSG=--message-base64=''${SMS_BASE64})
-          same => n,Hangup()
-
-          exten => voice,1,Answer()
-          same => n,Dial(PJSIP/alice-softphone)
-          same => n,Hangup()
-
-          exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -362,26 +366,33 @@ let
           same => n,Hangup()
 
           exten => voice,1,Answer()
-          same => n,Dial(PJSIP/tg#gearwlf@telegram-endpoint,,b(dongle-incoming-tg^outbound^1)) ; TODO fix the nicname
+          same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
+          same => n,Set(JITTERBUFFER(adaptive)=default)
+          same => n,Verbose(Inbound parameters set)
+          same => n,Dial(PJSIP/tg#${telegram_master_nicname}@telegram-endpoint,,b(dongle-incoming-tg^outbound^1))
           same => n,Hangup()
           exten => outbound,1,Set(JITTERBUFFER(adaptive)=default)
-          ; same => n,Set(AGC(rx)=4000)
           same => n,Verbose(Outbound parameters set)
           same => n,Return()
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-          [telegram-incoming-test]
+          [telegram-incoming-lenny]
           exten => telegram,1,Verbose(Incoming from telegram)
-          same => n,Goto(telegram-incoming-test,talk,1)
+          same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
+          same => n,Goto(telegram-incoming-lenny,talk,1)
 
           exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
           same => n,Playback(${lenny-sound-files}/Lenny''${i})
           same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
           same => n,Hangup()
+          exten => h,1,StopMonitor()
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
           EOF
 
           ###################
@@ -395,31 +406,9 @@ let
           protocol=udp
           bind=127.0.0.1
 
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-          [alice-softphone]
-          type=endpoint
-          context=pjsip-incoming
-          disallow=all
-          allow=ulaw
-          auth=alice-auth
-          aors=alice-softphone
-
-          [alice-auth]
-          type=auth
-          auth_type=userpass
-          username=alice-softphone
-          password=Secret123
-
-          [alice-softphone]
-          type=aor
-          max_contacts=1
-
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
           [telegram-endpoint]
           type=endpoint
-          context=telegram-incoming-test
+          context=telegram-incoming-lenny
           disallow=all
           allow=opus
           aors=telegram-aors
@@ -432,22 +421,17 @@ let
           type=identify
           endpoint=telegram-endpoint
           match=127.0.0.1/255.255.255.255
-
           EOF
         '';
-
-
-
-
       };
 
       tg2sip-conf = pkgs.writeTextDir "etc/settings.ini" ''
         [logging]
-        core=1                 ; 0-trace  2-info  4-err   6-off
+        core=3                 ; 0-trace  2-info  4-err   6-off
                                ; 1-debug  3-warn  5-crit
 
         tgvoip=5               ; same as core
-        pjsip=0                ; same as core
+        pjsip=3                ; same as core
         sip_messages=true      ; log sip messages if pjsip debug is enabled
 
         console_min_level=0    ; minimal log level that will be written into console
@@ -493,6 +477,5 @@ let
     };
   };
 
-          # ; same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message-base64=''${SMS_BASE64})
 in
   local.collection

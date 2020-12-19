@@ -112,10 +112,13 @@ References
 * Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
 * An article about PJSIP configuration https://www.redhat.com/sysadmin/asterisk-dialplan
 * https://wiki.asterisk.org/wiki/display/AST/PJSIP+Configuration+Sections+and+Relationships
-* OPUS problem:
+* OPUS related:
   - https://community.asterisk.org/t/codec-opus-source-code/72738/6
   - Binary opus module 'sends some statistics back to Digium' http://downloads.digium.com/pub/telephony/codec_opus/
   - OpenSource equivalent https://github.com/traud/asterisk-opus
+* Dialplan:
+  - Dial https://wiki.asterisk.org/wiki/display/AST/Application_Dial
+  - AGC https://wiki.asterisk.org/wiki/display/AST/Function_AGC
 
 **GSM modem**
 

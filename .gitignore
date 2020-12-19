@@ -1,7 +1,7 @@
 .ccls*
 result*
 a.out
-secret.nix
+secrets.nix
 secret.py
 secret.json
 *.pyc
