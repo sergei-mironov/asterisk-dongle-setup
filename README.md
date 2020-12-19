@@ -12,8 +12,21 @@ following tasks:
 * [x] Forward voice calls to Telegram.
 * [ ] Handle voice calls with a chat bot.
 
+Contents
+--------
+
+1. [Setup](#Setup)
+   - [Walkthrough](#Walkthrough)
+   - [Doing USB Modeswitch manually](#Doing-USB-Modeswitch-manually)
+   - [Nix-shell](#Nix-shell)
+2. [Hardware](#Hardware)
+3. [Issues](#Issues)
+4. [References](#References)
+
 Setup
-=====
+-----
+
+### Walkthrough
 
 0. Install [Nix package manager](https://nixos.org/guides/install-nix.html).
    Note that it could easily co-exist with your native package manager. We use
@@ -88,7 +101,7 @@ $ nix-shell -A shell
 ```
 
 Hardware
-========
+--------
 
 We use the following USB dongle:
 
@@ -101,7 +114,7 @@ dongle0      0     Free       9    0    0       Beeline        E173       11.126
 See also [somewhat outdated list of supported devices](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
 
 Issues
-======
+------
 
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
@@ -114,7 +127,7 @@ Issues
 * On top of above, we run Asterisk is as root, due to `chan_dongle` hardcodings.
 
 References
-==========
+----------
 
 **GSM modems**
 
