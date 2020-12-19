@@ -98,36 +98,37 @@ Issues
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/121~~
+* ~~https://github.com/Infactum/tg2sip/issues/42~~
+* ~~https://community.asterisk.org/t/help-translating-a-simple-peer-config-to-pjsip/86601~~
 * https://github.com/wdoekes/asterisk-chan-dongle/issues/120
-* https://github.com/Infactum/tg2sip/issues/42
-* https://community.asterisk.org/t/help-translating-a-simple-peer-config-to-pjsip/86601
+* Binary `chan_opus.so` is used
 
 
 References
 ==========
 
-**Asterisk**
+**GSM modems**
 
-* Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
-* An article about PJSIP configuration https://www.redhat.com/sysadmin/asterisk-dialplan
-* https://wiki.asterisk.org/wiki/display/AST/PJSIP+Configuration+Sections+and+Relationships
-* OPUS related:
-  - https://community.asterisk.org/t/codec-opus-source-code/72738/6
-  - Binary opus module 'sends some statistics back to Digium' http://downloads.digium.com/pub/telephony/codec_opus/
-  - OpenSource equivalent https://github.com/traud/asterisk-opus
-* Dialplan:
-  - Dial https://wiki.asterisk.org/wiki/display/AST/Application_Dial
-  - AGC https://wiki.asterisk.org/wiki/display/AST/Function_AGC
-
-**GSM modem**
-
-* GSMCTL https://www.unix.com/man-page/debian/8/gsmctl/
-  - Homepage looks inactive
-* MMCLI https://www.freedesktop.org/software/ModemManager/man/1.0.0/mmcli.8.html
 * Asterisk+Dongle setup guide (in Russian)
   http://linux.mixed-spb.ru/asterisk/dongle_app1.php
 * Another Dongle guide in Russian
   https://jakondo.ru/podklyuchenie-gsm-modema-usb-huawei-e1550-k-asterisk-13-chan_dongle-na-debian-8-jessie/
+* Unrelated GSM software:
+  - GSMCTL (abandoned?) https://www.unix.com/man-page/debian/8/gsmctl/
+  - MMCLI https://www.freedesktop.org/software/ModemManager/man/1.0.0/mmcli.8.html
+
+**Asterisk**
+
+* Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
+* Generic information about PJSIP https://wiki.asterisk.org/wiki/display/AST/PJSIP+Configuration+Sections+and+Relationships
+* An article about PJSIP configuration https://www.redhat.com/sysadmin/asterisk-dialplan
+* Setting up TG2SIP (In Russian) https://voxlink.ru/kb/asterisk-configuration/ustanovka-i-nastrojka-sip-shljuza-dlja-telegram/
+* About OPUS codec:
+  - https://community.asterisk.org/t/codec-opus-source-code/72738/6
+  - Binary opus module 'sends some statistics back to Digium' http://downloads.digium.com/pub/telephony/codec_opus/
+  - OpenSource equivalent https://github.com/traud/asterisk-opus
+* Important dialplan commands:
+  - Dial https://wiki.asterisk.org/wiki/display/AST/Application_Dial
 
 **Telegram**
 
@@ -139,3 +140,4 @@ References
 **Fun**
 
 * Lenny https://crosstalksolutions.com/howto-pwn-telemarketers-with-lenny/
+
