@@ -36,6 +36,7 @@ let
       '';
       };
 
+      # FIXME: Toxic binary component! Get rid of it ASAP!
       codec_opus = stdenv.mkDerivation rec {
         name = "codec_opus";
 
@@ -56,9 +57,6 @@ let
         configureFlags = old.configureFlags ++ [
           "--disable-xmldoc"
         ];
-        # postInstall = old.postInstall + ''
-        #   cp ${codec_opus}/lib/* $out/lib64/asterisk/modules
-        # '';
       });
 
       usb_modeswitch = stdenv.mkDerivation {
@@ -99,6 +97,11 @@ let
         buildInputs = with pkgs; [ gperf openssl readline zlib ];
         nativeBuildInputs = with pkgs; [ cmake ];
       };
+
+      pjsip = pkgs.pjsip.overrideAttrs (old: rec {
+        pname = old.pname + "+opus";
+        buildInputs = old.buildInputs ++ [ pkgs.libopus.dev ];
+      });
 
       tg2sip = stdenv.mkDerivation rec {
         name = "tg2sip";
@@ -298,6 +301,9 @@ let
           interval=15
           ;smsdb=/tmp/asterisk/smsdb
           ;csmsttl=5
+          jbenable = yes
+          jbforce = yes
+          jbmaxsize = 200
 
           [defaults]
           group=0				; calling group
