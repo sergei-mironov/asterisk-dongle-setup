@@ -397,8 +397,12 @@ let
           same => n,Hangup()
 
           exten => voice,1,Answer()
-          same => n,Dial(SIP/tg#XXXXX@telegram-endpoint) ; TODO fix the nicname
+          same => n,Dial(SIP/tg#XXXX@telegram-endpoint,,b(dongle-incoming-tg^outbound^1)) ; TODO fix the nicname
           same => n,Hangup()
+          exten => outbound,1,Set(JITTERBUFFER(adaptive)=default)
+          ; same => n,Set(AGC(rx)=1000)
+          same => n,Verbose(Outbound parameters set)
+          same => n,Return()
 
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
