@@ -36,12 +36,29 @@ let
       '';
       };
 
+      codec_opus = stdenv.mkDerivation rec {
+        name = "codec_opus";
+
+        src = pkgs.fetchurl {
+          url = "http://downloads.digium.com/pub/telephony/codec_opus/asterisk-16.0/x86-64/codec_opus-16.0_1.3.0-x86_64.tar.gz";
+          sha256 = "sha256:1axsrlr1a0ki4gvxqbh2cmnzgkvyvpgqxpg82hlq2gr0ilnp1c3a";
+        };
+
+        installPhase = ''
+          mkdir -pv $out/lib/asterisk/modules
+          cp -v -r -t $out/lib/asterisk/modules *so
+        '';
+      };
+
       asterisk = pkgs.asterisk_16.overrideAttrs (old: rec {
         pname = old.pname + "-tweaked";
 
         configureFlags = old.configureFlags ++ [
           "--disable-xmldoc"
         ];
+        # postInstall = old.postInstall + ''
+        #   cp ${codec_opus}/lib/* $out/lib64/asterisk/modules
+        # '';
       });
 
       usb_modeswitch = stdenv.mkDerivation {
@@ -88,7 +105,7 @@ let
         version = "1.2.0";
 
         buildInputs = with pkgs; [
-          openssl libopus.dev pkgconfig cmake asterisk pjsip spdlog_0 tdlib_160
+          openssl libopus.dev pkgconfig cmake pjsip spdlog_0 tdlib_160
           alsaLib
         ];
 
@@ -162,7 +179,8 @@ let
       asterisk-modules = pkgs.symlinkJoin {
         name = "asterisk-modules";
         paths = [ "${asterisk}/lib/asterisk/modules"
-                  asterisk-chan-dongle ];
+                  asterisk-chan-dongle
+                  "${codec_opus}/lib/asterisk/modules" ];
       };
 
 
@@ -201,6 +219,78 @@ let
           runuser = root		; The user to run as.
           rungroup = root		; The group to run as.
           EOF
+
+          ###################
+          ## CODECS.CONF
+          ###################
+          chmod +w $out/etc/asterisk/codecs.conf
+          cat >>$out/etc/asterisk/codecs.conf <<EOF
+          [opus]
+          type=opus
+          fec=yes
+          packet_loss=10
+          dtx=yes
+          cbr=yes
+          bitrate=48000
+          complexity=8
+          max_playback_rate=48000
+          EOF
+
+
+          ###################
+          ## MODULES.CONF
+          ###################
+
+          rm $out/etc/asterisk/modules.conf
+          cat >$out/etc/asterisk/modules.conf <<EOF
+          [modules]
+          autoload=yes
+          noload => chan_alsa.so
+          noload => chan_console.so
+          noload => res_hep.so
+          noload => res_hep_pjsip.so
+          noload => res_hep_rtcp.so
+
+          noload = chan_pjsip.so
+          ; noload = res_pjsip_endpoint_identifier_anonymous.so
+          ; noload = res_pjsip_messaging.so
+          ; noload = res_pjsip_pidf.so
+          noload = res_pjsip_session.so
+          ; noload = func_pjsip_endpoint.so
+          ; noload = res_pjsip_endpoint_identifier_ip.so
+          ; noload = res_pjsip_mwi.so
+          ; noload = res_pjsip_pubsub.so
+          noload = res_pjsip.so
+          ; noload = res_pjsip_acl.so
+          ; noload = res_pjsip_endpoint_identifier_user.so
+          ; noload = res_pjsip_nat.so
+          ; noload = res_pjsip_refer.so
+          ; noload = res_pjsip_t38.so
+          ; noload = res_pjsip_authenticator_digest.so
+          ; noload = res_pjsip_exten_state.so
+          ; noload = res_pjsip_notify.so
+          ; noload = res_pjsip_registrar_expire.so
+          ; noload = res_pjsip_transport_websocket.so
+          ; noload = res_pjsip_caller_id.so
+          ; noload = res_pjsip_header_funcs.so
+          ; noload = res_pjsip_one_touch_record_info.so
+          ; noload = res_pjsip_registrar.so
+          ; noload = res_pjsip_diversion.so
+          ; noload = res_pjsip_log_forwarder.so
+          ; noload = res_pjsip_outbound_authenticator_digest.so
+          ; noload = res_pjsip_rfc3326.so
+          ; noload = res_pjsip_dtmf_info.so
+          ; noload = res_pjsip_logger.so
+          ; noload = res_pjsip_outbound_registration.so
+          ; noload = res_pjsip_sdp_rtp.so
+          ; noload = res_pjsip_outbound_publish.so
+          ; noload = res_pjsip_config_wizard.so
+          ; noload = res_pjproject.so
+          EOF
+
+          ###################
+          ## DONGLE.CONF
+          ###################
 
           # cp -v ${asterisk-chan-dongle.src}/etc/dongle.conf $out/etc/asterisk
           cat >$out/etc/asterisk/dongle.conf <<EOF
@@ -252,6 +342,10 @@ let
           smsaspdu=yes
           EOF
 
+          ###################
+          ## EXTENSIONS.CONF
+          ###################
+
           rm $out/etc/asterisk/extensions.conf
           cat >$out/etc/asterisk/extensions.conf <<"EOF"
           [general]
@@ -297,7 +391,7 @@ let
           same => n,Hangup()
 
           exten => voice,1,Answer()
-          same => n,Dial(PJSIP/telegram-endpoint)
+          same => n,Dial(SIP/tg#XXXXX@telegram-endpoint) ; TODO fix the nicname
           same => n,Hangup()
 
           exten => h,1,StopMonitor()
@@ -308,9 +402,11 @@ let
           [telegram-incoming-test]
           exten => sms,1,Verbose(Incoming from telegram)
           same => n,Hangup()
-
           EOF
 
+          ###################
+          ## PJSIP.CONF
+          ###################
 
           rm $out/etc/asterisk/pjsip.conf
           cat >$out/etc/asterisk/pjsip.conf <<EOF
@@ -359,7 +455,38 @@ let
           type=aor
           contact=sip:telegram@127.0.0.1:5062
           EOF
+
+
+          ###################
+          ## SIP.CONF
+          ###################
+          rm $out/etc/asterisk/sip.conf
+          cat >$out/etc/asterisk/sip.conf <<"EOF"
+          [general]
+          udpbindaddr=0.0.0.0
+          ; register => sip:telegram@127.0.0.1:5062
+          [telegram-endpoint]
+          ; deny=0.0.0.0/0.0.0.0
+          type=peer
+          ; qualify=yes
+          ; permit=192.168.0.2/255.255.0.0
+          host=127.0.0.1
+          port=5062
+          fromdomain=127.0.0.1
+          nat=no
+          insecure=port,invite
+          canreinvite=no
+          dtmfmode=rfc2833
+          disallow=all
+          allow=opus
+          context=telegram-incoming-test
+          EOF
+
         '';
+
+
+
+
       };
 
       tg2sip-conf = pkgs.writeTextDir "etc/settings.ini" ''
