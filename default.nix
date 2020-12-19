@@ -231,12 +231,13 @@ let
           [opus]
           type=opus
           fec=yes
-          packet_loss=10
           dtx=yes
           cbr=yes
           bitrate=48000
           complexity=8
           max_playback_rate=48000
+          application=audio
+          signal=voice
           EOF
 
 
@@ -253,42 +254,6 @@ let
           noload => res_hep.so
           noload => res_hep_pjsip.so
           noload => res_hep_rtcp.so
-
-          noload = chan_pjsip.so
-          ; noload = res_pjsip_endpoint_identifier_anonymous.so
-          ; noload = res_pjsip_messaging.so
-          ; noload = res_pjsip_pidf.so
-          noload = res_pjsip_session.so
-          ; noload = func_pjsip_endpoint.so
-          ; noload = res_pjsip_endpoint_identifier_ip.so
-          ; noload = res_pjsip_mwi.so
-          ; noload = res_pjsip_pubsub.so
-          noload = res_pjsip.so
-          ; noload = res_pjsip_acl.so
-          ; noload = res_pjsip_endpoint_identifier_user.so
-          ; noload = res_pjsip_nat.so
-          ; noload = res_pjsip_refer.so
-          ; noload = res_pjsip_t38.so
-          ; noload = res_pjsip_authenticator_digest.so
-          ; noload = res_pjsip_exten_state.so
-          ; noload = res_pjsip_notify.so
-          ; noload = res_pjsip_registrar_expire.so
-          ; noload = res_pjsip_transport_websocket.so
-          ; noload = res_pjsip_caller_id.so
-          ; noload = res_pjsip_header_funcs.so
-          ; noload = res_pjsip_one_touch_record_info.so
-          ; noload = res_pjsip_registrar.so
-          ; noload = res_pjsip_diversion.so
-          ; noload = res_pjsip_log_forwarder.so
-          ; noload = res_pjsip_outbound_authenticator_digest.so
-          ; noload = res_pjsip_rfc3326.so
-          ; noload = res_pjsip_dtmf_info.so
-          ; noload = res_pjsip_logger.so
-          ; noload = res_pjsip_outbound_registration.so
-          ; noload = res_pjsip_sdp_rtp.so
-          ; noload = res_pjsip_outbound_publish.so
-          ; noload = res_pjsip_config_wizard.so
-          ; noload = res_pjproject.so
           EOF
 
           ###################
@@ -397,10 +362,10 @@ let
           same => n,Hangup()
 
           exten => voice,1,Answer()
-          same => n,Dial(SIP/tg#XXXX@telegram-endpoint,,b(dongle-incoming-tg^outbound^1)) ; TODO fix the nicname
+          same => n,Dial(PJSIP/tg#gearwlf@telegram-endpoint,,b(dongle-incoming-tg^outbound^1)) ; TODO fix the nicname
           same => n,Hangup()
           exten => outbound,1,Set(JITTERBUFFER(adaptive)=default)
-          ; same => n,Set(AGC(rx)=1000)
+          ; same => n,Set(AGC(rx)=4000)
           same => n,Verbose(Outbound parameters set)
           same => n,Return()
 
@@ -410,7 +375,12 @@ let
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
           [telegram-incoming-test]
-          exten => sms,1,Verbose(Incoming from telegram)
+          exten => telegram,1,Verbose(Incoming from telegram)
+          same => n,Goto(telegram-incoming-test,talk,1)
+
+          exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
+          same => n,Playback(${lenny-sound-files}/Lenny''${i})
+          same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
           same => n,Hangup()
           EOF
 
@@ -452,46 +422,18 @@ let
           context=telegram-incoming-test
           disallow=all
           allow=opus
-          auth=telegram-auth
           aors=telegram-aors
-
-          [telegram-auth]
-          type=auth
-          auth_type=userpass
-          username=telegram  ; Is it for inbound or outbound registrations?
-          password=123
 
           [telegram-aors]
           type=aor
           contact=sip:telegram@127.0.0.1:5062
+
+          [telegram-identify]
+          type=identify
+          endpoint=telegram-endpoint
+          match=127.0.0.1/255.255.255.255
+
           EOF
-
-
-          ###################
-          ## SIP.CONF
-          ###################
-          rm $out/etc/asterisk/sip.conf
-          cat >$out/etc/asterisk/sip.conf <<"EOF"
-          [general]
-          udpbindaddr=0.0.0.0
-          ; register => sip:telegram@127.0.0.1:5062
-          [telegram-endpoint]
-          ; deny=0.0.0.0/0.0.0.0
-          type=peer
-          ; qualify=yes
-          ; permit=192.168.0.2/255.255.0.0
-          host=127.0.0.1
-          port=5062
-          fromdomain=127.0.0.1
-          nat=no
-          insecure=port,invite
-          canreinvite=no
-          dtmfmode=rfc2833
-          disallow=all
-          allow=opus
-          context=telegram-incoming-test
-          EOF
-
         '';
 
 
