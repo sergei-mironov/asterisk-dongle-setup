@@ -8,4 +8,7 @@
   telegram_chat_id="-1111111111111";
   # Telegram Nicname to redirect CALLs to
   telegram_master_nicname="realuser";
+
+  tg2sip_api_id=throw "Specify your Telegram api_id for tg2sip as a number";
+  tg2sip_api_hash= throw "Specify your Telegram API_HASH for tg2sip as a string";
 }
