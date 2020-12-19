@@ -9,7 +9,7 @@ The project aims at automating the configuration of software able to solve the
 following tasks:
 
 * [x] Receive SMS messages and forward them to a Telegram chat.
-* [ ] Handle voice calls with voice menu.
+* [x] Handle voice calls with voice menu.
 * [ ] Handle voice calls with a chat bot.
 
 Setup
@@ -20,8 +20,7 @@ Setup
    [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/)
    as a base.
 1. `git clone --recursive <this-repo-url> ; cd ...`
-2. Create `./secret.json` file for Telegram by copying and editing
-   `./secret_example.json`.
+2. Create `./secrets.nix` file by copying and editing `./secrets_template.nix`.
    - You need a mobile phone which is bound to some Telegram account.
    - Go to https://my.telegram.org/auth and register an API Client instance.
      You will be provided with `api_id` and `api_hash` values.
@@ -52,7 +51,7 @@ Setup
    * To receive SMS with `E173`:
      - `dongle cmd dongle0 AT^PORTSEL=1`.
      - Send SMS/Call to dongle SIMcard's number
-     - [x] TODO: Patch the driver.
+     - [x] Patch the driver.
 
 ### Doing USB Modeswitch manually
 
