@@ -1,7 +1,8 @@
 #!/bin/sh
 
+CWD=`pwd`
 ME=`basename $0`
-TELEGRAM_SESSION="`pwd`/telegram.session"
+TELEGRAM_SESSION="$CWD/telegram.session"
 
 set -e -x
 
@@ -27,7 +28,7 @@ try_to_deal_with() {
   vendor="$1"
   product="$2"
   if lsusb | grep -q "$vendor:$product" ; then
-    sudo `pwd`/result-modeswitch/usr/sbin/usb_modeswitch -v "$vendor" -p "$product" -X
+    sudo $CWD/result-modeswitch/usr/sbin/usb_modeswitch -v "$vendor" -p "$product" -X
     sleep 0.5
     return 0
   else
@@ -60,19 +61,22 @@ fi
 
 # 3. Preparing Telegram session
 
-`pwd`/result-python/bin/telegram_check.py --session="$TELEGRAM_SESSION" \
+$CWD/result-python/bin/telegram_check.py --session="$TELEGRAM_SESSION" \
                                           --secret="$PYTHON_SECRETS"
 
-#FIXME: call <tg2sip>/bin/gen_db
 
-# 4. Run asterisk daemon synchronously, verbosely, interactively
+# 4. Run TG2SIP
 
-# FIXME: enable
-# cp ./result-tg2sip-conf/etc/settings.ini settings.ini
-# ./result-tg2sip/bin/tg2sip
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+mkdir /tmp/tg2sip || true
+cp -f $CWD/result-tg2sip-conf/etc/settings.ini /tmp/tg2sip/settings.ini
+( cd /tmp/tg2sip && $CWD/result-tg2sip/bin/gen_db; )
+( cd /tmp/tg2sip && $CWD/result-tg2sip/bin/tg2sip; ) &
+
+# 5. Run Asterisk daemon synchronously, verbosely, interactively
 
 sudo rm -rf /tmp/asterisk || true
 sudo mkdir /tmp/asterisk
 
-sudo ./result-asterisk/bin/asterisk -C `pwd`/result-conf/etc/asterisk/asterisk.conf -c -f -vvvvvvvvv
+sudo ./result-asterisk/bin/asterisk -C $CWD/result-conf/etc/asterisk/asterisk.conf -c -f -vvvvvvvvv
 

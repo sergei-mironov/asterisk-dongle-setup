@@ -425,7 +425,8 @@ let
         '';
       };
 
-      tg2sip-conf = pkgs.writeTextDir "etc/settings.ini" ''
+      tg2sip-conf = pkgs.writeTextDir "etc/settings.ini"
+        (with secrets; ''
         [logging]
         core=3                 ; 0-trace  2-info  4-err   6-off
                                ; 1-debug  3-warn  5-crit
@@ -462,18 +463,16 @@ let
                                 ; packets. A value of one is recommended for most applications.
 
         [telegram]
-        api_id=2631010 ; FIXME: Application identifier for Telegram API access
-        api_hash=899a7e59e30e2be5a55cbb488984a1eb ; FIXME: Application identifier hash for Telegram API access
-                                                  ; which can be obtained at https://my.telegram.org.
-
-        system_language_code=ru-RU      ; IETF language tag of the user's operating system language
+        api_id=${toString tg2sip_api_id}
+        api_hash=${tg2sip_api_hash}
+        system_language_code=ru-RU     ; IETF language tag of the user's operating system language
 
         [other]
         extra_wait_time=10             ; If gateway gets temporary blocked with "Too Many Requests" reason,
                                        ; then block all outgoing telegram requests for X more seconds than was
                                        ; requested by server
         ;peer_flood_time=86400         ; Seconds to wait on PEER_FLOOD
-      '';
+      '');
     };
   };
 

@@ -28,30 +28,37 @@ Setup
    - Chat id is a (typically negative) identifier of a chat to send SMS messages
      to. `./asterisk.sh` will print available chat identifiers of a client at
      some point.
-3. Setup the GSM Modem. You need to get a supported GSM modem and plug it into
+3. Setup the GSM Modem. You need to find a supported GSM modem and plug it into
    USB port of your computer.
    - See the chan-dongle's
      [README.md](https://github.com/wdoekes/asterisk-chan-dongle) for
      information about the supported hardware. Some outdated document is also
      available
      [here](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
-   - `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If it
-     is not present, the script would attempt to run the `usb_modeswitch`
-     procedure. But only a small number of devices (currently, 1) is encoded,
-     so an update may be required. See below section for details.
-4. Run the main script `./asterisk.sh`.
-   - The script currently relies on `sudo` to overcome difficulties with
-     chan-dongle's hardcoded paths.
-   - Script initializes Telegram session. As a part of initialization, Telegram
-     server will send a digital code to your Telegram application. You are to
-     type this code back into the script.
-5. ???
-6. Do some hacking:
-   * To send SMS from the GSM modem, do: `dongle sms dongle0 89097777777 HiHi`
-   * To receive SMS with `E173`:
-     - `dongle cmd dongle0 AT^PORTSEL=1`.
-     - Send SMS/Call to dongle SIMcard's number
-     - [x] Patch the driver.
+   - Note that `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If
+     it is not present, the script would attempt to run the `usb_modeswitch`
+     procedure. **Currently we automated switching only for Huawei E173 modem**.
+     For other models, see the section about manual switching below.
+4. **Please be informed that the main script `./asterisk.sh` is VERY INSECURE.
+   It configures Asterisk to use binary codec and then runs it as root.**
+5. If you are OK with above notice, run `./asterisk.sh`.
+   - At first run script will initialize Telegram session for python relay
+     script.
+     + As a part of initialization, Telegram server will send a digital
+       code to your Telegram account.
+     + You are to type this code back into the script.
+   - At first run the script will also initialize another Telegram session, this
+     time for `tg2sip` (TODO: find out how to reuse the first session).
+     + It will ask you a phone number with Telegram account.
+     + Telegram will send a code to your account. You have to read it and type
+       it back into the script.
+6. ???
+7. Do something:
+   * To send SMS from the GSM modem, use the Asterisk CLI: `dongle sms dongle0
+     89097777777 HiHi`.
+   * Send SMS or make a call to your GSMmodem's SIM card. Asterisk will redirect
+     them to your Telegram account.
+   * Also Asterisk will record calls and send recordings to Telegram.
 
 ### Doing USB Modeswitch manually
 
@@ -68,6 +75,7 @@ known to author. In case the procedure fails, one could attempt the manual way:
    ```
    try_to_deal_with "<your_device_id>" "<your_device_vendor>" && wait_for_chardev "/dev/ttyUSB0"
    ```
+6. Send me a PR with it.
 
 ### Nix-shell
 
@@ -101,8 +109,9 @@ Issues
 * ~~https://github.com/Infactum/tg2sip/issues/42~~
 * ~~https://community.asterisk.org/t/help-translating-a-simple-peer-config-to-pjsip/86601~~
 * https://github.com/wdoekes/asterisk-chan-dongle/issues/120
-* Binary `chan_opus.so` is used
-
+* Binary codec `chan_opus.so` is required by tg2sip. Consider replacing it with
+  https://github.com/traud/asterisk-opus
+* On top of above, we run Asterisk is as root, due to `chan_dongle` hardcodings.
 
 References
 ==========
