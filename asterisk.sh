@@ -2,17 +2,13 @@
 
 ME=`basename $0`
 TELEGRAM_SESSION="`pwd`/telegram.session"
-TELEGRAM_SECRET=`pwd`/secret.json
-
-if ! test -f "$TELEGRAM_SECRET" ; then
-  echo "\`$TELEGRAM_SECRET' not found. This file is required for Telegram client "
-  echo "to work. Consider copying and filling the \`./secret_example.json'"
-  exit 1
-fi
 
 set -e -x
 
 # 1. Build required applications
+
+nix-build -A python_secrets_json -o result-python-secrets
+PYTHON_SECRETS=`readlink ./result-python-secrets`
 
 nix-build -A sox -o result-sox
 export PATH=`readlink ./result-sox`/bin/:$PATH
@@ -20,9 +16,10 @@ sox --version
 
 nix-build -A asterisk -o result-asterisk -K
 nix-build -A asterisk-conf -o result-conf \
-          --argstr telegram_session "$TELEGRAM_SESSION" \
-          --argstr telegram_secret "$TELEGRAM_SECRET"
+          --argstr telegram_session "$TELEGRAM_SESSION"
 nix-build -A python-scripts -o result-python
+nix-build -A tg2sip -o result-tg2sip
+nix-build -A tg2sip-conf -o result-tg2sip-conf
 
 # 2. Prepare the modem. We may need to switch it to the serial mode.
 
@@ -64,9 +61,15 @@ fi
 # 3. Preparing Telegram session
 
 `pwd`/result-python/bin/telegram_check.py --session="$TELEGRAM_SESSION" \
-                                            --secret="$TELEGRAM_SECRET"
+                                          --secret="$PYTHON_SECRETS"
+
+#FIXME: call <tg2sip>/bin/gen_db
 
 # 4. Run asterisk daemon synchronously, verbosely, interactively
+
+# FIXME: enable
+# cp ./result-tg2sip-conf/etc/settings.ini settings.ini
+# ./result-tg2sip/bin/tg2sip
 
 sudo rm -rf /tmp/asterisk || true
 sudo mkdir /tmp/asterisk

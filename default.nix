@@ -1,10 +1,12 @@
 { pkgs ? import <nixpkgs> {}
 , stdenv ? pkgs.stdenv
-, telegram_session ? throw "telegram_session argument is required"
-, telegram_secret ? throw "telegram_secret argument is required"
+, secrets ? import ./secrets.nix
+, telegram_session ? throw "Please specify path to telegram session file"
 }:
 
 let
+  inherit (secrets) telegram_master_nicname;
+
   python = pkgs.python37Packages;
 
   local = rec {
@@ -34,6 +36,33 @@ let
       shellHook = with pkgs; ''
         export PYTHONPATH=`pwd`/python:$PYTHONPATH
       '';
+      };
+
+      # FIXME: Remove boilerplate
+      # FIXME: Here all the secrets go to the /nix/store :(
+      python_secrets_json = pkgs.writeText "python_secrets.json"
+        (with secrets; ''
+        { "telegram_app_title":"${telegram_app_title}"
+        , "telegram_api_id":${toString telegram_api_id}
+        , "telegram_api_hash":"${telegram_api_hash}"
+        , "telegram_bot_token":"${telegram_bot_token}"
+        , "telegram_phone":"${telegram_phone}"
+        , "telegram_chat_id":${toString telegram_chat_id}
+        }'');
+
+      # FIXME: Toxic binary component! Get rid of it ASAP!
+      codec_opus = stdenv.mkDerivation rec {
+        name = "codec_opus";
+
+        src = pkgs.fetchurl {
+          url = "http://downloads.digium.com/pub/telephony/codec_opus/asterisk-16.0/x86-64/codec_opus-16.0_1.3.0-x86_64.tar.gz";
+          sha256 = "sha256:1axsrlr1a0ki4gvxqbh2cmnzgkvyvpgqxpg82hlq2gr0ilnp1c3a";
+        };
+
+        installPhase = ''
+          mkdir -pv $out/lib/asterisk/modules
+          cp -v -r -t $out/lib/asterisk/modules *so
+        '';
       };
 
       asterisk = pkgs.asterisk_16.overrideAttrs (old: rec {
@@ -83,16 +112,25 @@ let
         nativeBuildInputs = with pkgs; [ cmake ];
       };
 
+      pjsip = pkgs.pjsip.overrideAttrs (old: rec {
+        pname = old.pname + "+opus";
+        buildInputs = old.buildInputs ++ [ pkgs.libopus.dev ];
+        configureFlags = [ "--disable-sound" "CFLAGS=-O3" ];
+        preBuild = ''
+          mkdir tg2sip-src
+          ${pkgs.atool}/bin/aunpack --extract-to=tg2sip-src ${tg2sip.src}
+          cp tg2sip-src/tg2sip*/buildenv/config_site.h pjlib/include/pj/config_site.h
+        '';
+      });
+
       tg2sip = stdenv.mkDerivation rec {
         name = "tg2sip";
         version = "1.2.0";
 
         buildInputs = with pkgs; [
-          openssl libopus.dev pkgconfig cmake asterisk pjsip spdlog_0 tdlib_160
+          openssl libopus.dev pkgconfig cmake pjsip spdlog_0 tdlib_160
           alsaLib
         ];
-
-        # makeFlags = ["-j30"];
 
         installPhase = ''
           mkdir -pv $out/bin
@@ -162,7 +200,8 @@ let
       asterisk-modules = pkgs.symlinkJoin {
         name = "asterisk-modules";
         paths = [ "${asterisk}/lib/asterisk/modules"
-                  asterisk-chan-dongle ];
+                  asterisk-chan-dongle
+                  "${codec_opus}/lib/asterisk/modules" ];
       };
 
 
@@ -202,15 +241,54 @@ let
           rungroup = root		; The group to run as.
           EOF
 
+          ###################
+          ## CODECS.CONF
+          ###################
+          chmod +w $out/etc/asterisk/codecs.conf
+          cat >>$out/etc/asterisk/codecs.conf <<EOF
+          [opus]
+          type=opus
+          fec=yes
+          dtx=yes
+          cbr=yes
+          bitrate=48000
+          complexity=8
+          max_playback_rate=48000
+          application=audio
+          signal=voice
+          EOF
+
+
+          ###################
+          ## MODULES.CONF
+          ###################
+
+          rm $out/etc/asterisk/modules.conf
+          cat >$out/etc/asterisk/modules.conf <<EOF
+          [modules]
+          autoload=yes
+          noload => chan_alsa.so
+          noload => chan_console.so
+          noload => res_hep.so
+          noload => res_hep_pjsip.so
+          noload => res_hep_rtcp.so
+          EOF
+
+          ###################
+          ## DONGLE.CONF
+          ###################
+
           # cp -v ${asterisk-chan-dongle.src}/etc/dongle.conf $out/etc/asterisk
           cat >$out/etc/asterisk/dongle.conf <<EOF
           [general]
           interval=15
           ;smsdb=/tmp/asterisk/smsdb
           ;csmsttl=5
+          jbenable = yes
+          jbforce = yes
+          jbmaxsize = 200
 
           [defaults]
-          context=dongle-incoming			; context for incoming calls
           group=0				; calling group
           rxgain=0			; increase the incoming volume; may be negative
           txgain=0			; increase the outgoint volume; may be negative
@@ -248,16 +326,22 @@ let
           [dongle0]
           data=/dev/ttyUSB0
           audio=/dev/ttyUSB1
-          context=dongle-lenny
+          context=dongle-incoming-tg
           language=ru
           smsaspdu=yes
           EOF
+
+          ###################
+          ## EXTENSIONS.CONF
+          ###################
 
           rm $out/etc/asterisk/extensions.conf
           cat >$out/etc/asterisk/extensions.conf <<"EOF"
           [general]
 
-          [dongle-lenny]
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [dongle-incoming-lenny]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
           same => n,Set(MSG=--message-base64=''${SMS_BASE64})
           same => n,Hangup()
@@ -265,28 +349,55 @@ let
           exten => voice,1,Answer()
           same => n,Monitor(wav,''${UNIQUEID},m)
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
-          same => n,Goto(dongle-lenny,talk,1)
+          same => n,Goto(dongle-incoming-lenny,talk,1)
 
           exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
           same => n,Playback(${lenny-sound-files}/Lenny''${i})
           same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
-          [dongle-forward]
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [dongle-incoming-tg]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
           same => n,Set(MSG=--message-base64=''${SMS_BASE64})
           same => n,Hangup()
 
           exten => voice,1,Answer()
-          same => n,Dial(PJSIP/alice-softphone)
+          same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
+          same => n,Set(JITTERBUFFER(adaptive)=default)
+          same => n,Verbose(Inbound parameters set)
+          same => n,Dial(PJSIP/tg#${telegram_master_nicname}@telegram-endpoint,,b(dongle-incoming-tg^outbound^1))
           same => n,Hangup()
+          exten => outbound,1,Set(JITTERBUFFER(adaptive)=default)
+          same => n,Verbose(Outbound parameters set)
+          same => n,Return()
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [telegram-incoming-lenny]
+          exten => telegram,1,Verbose(Incoming from telegram)
+          same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
+          same => n,Goto(telegram-incoming-lenny,talk,1)
+
+          exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
+          same => n,Playback(${lenny-sound-files}/Lenny''${i})
+          same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
+          same => n,Hangup()
+          exten => h,1,StopMonitor()
+          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
           EOF
 
+          ###################
+          ## PJSIP.CONF
+          ###################
 
           rm $out/etc/asterisk/pjsip.conf
           cat >$out/etc/asterisk/pjsip.conf <<EOF
@@ -295,29 +406,76 @@ let
           protocol=udp
           bind=127.0.0.1
 
-          [alice-softphone]
+          [telegram-endpoint]
           type=endpoint
-          context=pjsip-incoming
+          context=telegram-incoming-lenny
           disallow=all
-          allow=ulaw
-          auth=alice-auth
-          aors=alice-softphone
+          allow=opus
+          aors=telegram-aors
 
-          [alice-auth]
-          type=auth
-          auth_type=userpass
-          username=alice-softphone
-          password=Secret123
-
-          [alice-softphone]
+          [telegram-aors]
           type=aor
-          max_contacts=1
+          contact=sip:telegram@127.0.0.1:5062
+
+          [telegram-identify]
+          type=identify
+          endpoint=telegram-endpoint
+          match=127.0.0.1/255.255.255.255
           EOF
         '';
       };
+
+      tg2sip-conf = pkgs.writeTextDir "etc/settings.ini" ''
+        [logging]
+        core=3                 ; 0-trace  2-info  4-err   6-off
+                               ; 1-debug  3-warn  5-crit
+
+        tgvoip=5               ; same as core
+        pjsip=3                ; same as core
+        sip_messages=true      ; log sip messages if pjsip debug is enabled
+
+        console_min_level=0    ; minimal log level that will be written into console
+        file_min_level=0       ; same but into file
+
+        ;tdlib=3                ; TDLib is written to file only and has its own log level values
+                                ; not affected by other log settings
+                                ; 0-fatal   2-warnings  4-debug
+                                ; 1-errors  3-info      5-verbose debug
+
+        [sip]
+        public_address=127.0.0.1
+        port=5062
+        ;port_range=0           ; Specify the port range for socket binding, relative to the start
+                                ; port number specified in port.
+        id_uri=sip:telegram@127.0.0.1
+                                ; The Address of Record or AOR, that is full SIP URL that identifies the account.
+                                ; The value can take name address or URL format, and will look something
+                                ; like "sip:account@serviceprovider".
+
+        callback_uri=sip:telegram@127.0.0.1:5060 ; FIXME: unhardcode the port
+                                ; SIP URI for TG->SIP incoming calls processing
+
+        raw_pcm=false           ; use L16@48k codec if true or OPUS@48k otherwise
+                                ; keep true for lower CPU consumption
+
+        ;thread_count=1         ; Specify the number of worker threads to handle incoming RTP
+                                ; packets. A value of one is recommended for most applications.
+
+        [telegram]
+        api_id=2631010 ; FIXME: Application identifier for Telegram API access
+        api_hash=899a7e59e30e2be5a55cbb488984a1eb ; FIXME: Application identifier hash for Telegram API access
+                                                  ; which can be obtained at https://my.telegram.org.
+
+        system_language_code=ru-RU      ; IETF language tag of the user's operating system language
+
+        [other]
+        extra_wait_time=10             ; If gateway gets temporary blocked with "Too Many Requests" reason,
+                                       ; then block all outgoing telegram requests for X more seconds than was
+                                       ; requested by server
+        ;peer_flood_time=86400         ; Seconds to wait on PEER_FLOOD
+      '';
     };
   };
 
-          # ; same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${telegram_secret}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message-base64=''${SMS_BASE64})
 in
   local.collection
