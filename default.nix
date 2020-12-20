@@ -66,11 +66,13 @@ let
       };
 
       asterisk = pkgs.asterisk_16.overrideAttrs (old: rec {
-        pname = old.pname + "-tweaked";
+        pname = old.pname + "+opus";
 
         configureFlags = old.configureFlags ++ [
           "--disable-xmldoc"
         ];
+
+        buildInputs = old.buildInputs ++ [ pkgs.libopus.dev ];
       });
 
       usb_modeswitch = stdenv.mkDerivation {
