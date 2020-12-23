@@ -48,7 +48,7 @@ Setup
      it is not present, the script would attempt to run the `usb_modeswitch`
      procedure.
    - **Currently we automated switching only for Huawei E173 modem**.
-     For other models, see the section about [manual mode-switching](#hardware).
+     For other models, see the section about [manual mode-switching](#Doing-USB-Modeswitch-manually).
 2. `git clone --recursive <this-repo-url> ; cd ...`
 3. Create `./secrets.nix` file by copying and editing `./secrets_template.nix`.
    - You need a mobile phone which is bound to some Telegram account.
@@ -94,7 +94,7 @@ known to author. In case the procedure fails, one could attempt the manual way:
    ```
    try_to_deal_with "<your_device_id>" "<your_device_vendor>" && wait_for_chardev "/dev/ttyUSB0"
    ```
-6. Send me a PR with it.
+6. Send us a PR with it.
 
 ### Nix-shell
 
