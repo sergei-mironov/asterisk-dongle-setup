@@ -32,7 +32,11 @@ Setup
    Note that it could easily co-exist with your native package manager. We use
    [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/)
    as a base.
-1. Go and get a GSM modem. ![Modem E173](Modem_E173.jpg) You need to find a
+1. Go and get a GSM modem.
+   
+   ![Modem E173](Modem_E173.jpg =150x)
+   
+   You need to find a
    supported GSM modem and plug it into USB port of your computer. We currently
    support `Huawei-E173` but in theory any model supported by
    [chan_dongle](https://github.com/wdoekes/asterisk-chan-dongle)
