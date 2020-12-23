@@ -32,17 +32,11 @@ Setup
    Note that it could easily co-exist with your native package manager. We use
    [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/)
    as a base.
-1. `git clone --recursive <this-repo-url> ; cd ...`
-2. Create `./secrets.nix` file by copying and editing `./secrets_template.nix`.
-   - You need a mobile phone which is bound to some Telegram account.
-   - Go to https://my.telegram.org/auth and register an API Client instance.
-     You will be provided with `api_id` and `api_hash` values.
-   - Bot token field is not currently used.
-   - Chat id is a (typically negative) identifier of a chat to send SMS messages
-     to. `./asterisk.sh` will print available chat identifiers of a client at
-     some point.
-3. Setup the GSM Modem. You need to find a supported GSM modem and plug it into
-   USB port of your computer.
+1. Go and get a GSM modem. ![Modem E173](Modem_E173.jpg) You need to find a
+   supported GSM modem and plug it into USB port of your computer. We currently
+   support `Huawei-E173` but in theory any model supported by
+   [chan_dongle](https://github.com/wdoekes/asterisk-chan-dongle)
+   should work.
    - See the chan-dongle's
      [README.md](https://github.com/wdoekes/asterisk-chan-dongle) for
      information about the supported hardware. Some outdated document is also
@@ -51,7 +45,16 @@ Setup
    - Note that `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If
      it is not present, the script would attempt to run the `usb_modeswitch`
      procedure. **Currently we automated switching only for Huawei E173 modem**.
-     For other models, see the section about manual switching below.
+     For other models, see the section about [manual mode-switching](#hardware).
+2. `git clone --recursive <this-repo-url> ; cd ...`
+3. Create `./secrets.nix` file by copying and editing `./secrets_template.nix`.
+   - You need a mobile phone which is bound to some Telegram account.
+   - Go to https://my.telegram.org/auth and register an API Client instance.
+     You will be provided with `api_id` and `api_hash` values.
+   - Bot token field is not currently used.
+   - Chat id is a (typically negative) identifier of a chat to send SMS messages
+     to. `./asterisk.sh` will print available chat identifiers of a client at
+     some point.
 4. **Please be informed that the main script `./asterisk.sh` is VERY INSECURE.
    It configures Asterisk to use binary codec and then runs it as root.**
 5. If you are OK with above notice, run `./asterisk.sh`.
