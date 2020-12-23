@@ -34,7 +34,7 @@ Setup
    as a base.
 1. Go and get a GSM modem.
    
-   ![Modem E173](Modem_E173.jpg =150x)
+   ![Modem E173](Modem_E173.jpg)
    
    You need to find a
    supported GSM modem and plug it into USB port of your computer. We currently
