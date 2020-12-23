@@ -41,14 +41,13 @@ Setup
    support `Huawei-E173` but in theory any model supported by
    [chan_dongle](https://github.com/wdoekes/asterisk-chan-dongle)
    should work.
-   - See the chan-dongle's
-     [README.md](https://github.com/wdoekes/asterisk-chan-dongle) for
-     information about the supported hardware. Some outdated document is also
-     available
-     [here](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
-   - Note that `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If
+   - Somewhat outdated document about supported hardware is available
+     [here](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations).
+     We typically care about Voice and SMS functions and don't care about USSD.
+   - `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If
      it is not present, the script would attempt to run the `usb_modeswitch`
-     procedure. **Currently we automated switching only for Huawei E173 modem**.
+     procedure.
+   - **Currently we automated switching only for Huawei E173 modem**.
      For other models, see the section about [manual mode-switching](#hardware).
 2. `git clone --recursive <this-repo-url> ; cd ...`
 3. Create `./secrets.nix` file by copying and editing `./secrets_template.nix`.
