@@ -5,7 +5,8 @@
 }:
 
 let
-  inherit (secrets) telegram_master_nicname;
+  inherit (secrets) telegram_master_nicname dongle_device_data
+                    dongle_device_audio;
 
   python = pkgs.python37Packages;
 
@@ -87,6 +88,9 @@ let
           sha256 = "sha256:18wbbxc5cfsmikba0msdvd5qlaga27b32nhrzicyd9mdddp265f2";
         };
       };
+
+      dongle-monitor = import ./nix/dongle-monitor.nix {
+        inherit pkgs stdenv secrets usb_modeswitch; };
 
       pyst2 = python.buildPythonPackage rec {
         pname = "pyst2";
@@ -326,8 +330,8 @@ let
                           ;  default is 'relax' by compatibility reason
 
           [dongle0]
-          data=/dev/ttyUSB0
-          audio=/dev/ttyUSB1
+          data=${dongle_device_data}
+          audio=${dongle_device_audio}
           context=dongle-incoming-tg
           language=ru
           smsaspdu=yes
