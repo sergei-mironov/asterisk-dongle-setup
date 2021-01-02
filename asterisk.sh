@@ -6,6 +6,8 @@ TELEGRAM_SESSION="$CWD/telegram.session"
 
 set -e -x
 
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+
 # 1. Build required applications
 
 nix-build -A python_secrets_json -o result-python-secrets
@@ -23,8 +25,6 @@ nix-build -A tg2sip -o result-tg2sip
 nix-build -A tg2sip-conf -o result-tg2sip-conf
 nix-build -A dongle-monitor -o result-dongle-monitor
 
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
-
 # 2. Prepare the modem. We may need to switch it to the serial mode.
 
 "$CWD/result-dongle-monitor/bin/dongle-monitor" &
@@ -37,14 +37,14 @@ trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 # 4. Run TG2SIP
 
 mkdir /tmp/tg2sip || true
-cp -f $CWD/result-tg2sip-conf/etc/settings.ini /tmp/tg2sip/settings.ini
-( cd /tmp/tg2sip && $CWD/result-tg2sip/bin/gen_db; )
-( cd /tmp/tg2sip && $CWD/result-tg2sip/bin/tg2sip; ) &
+cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
+( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/gen_db"; )
+( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/tg2sip"; ) &
 
 # 5. Run Asterisk daemon synchronously, verbosely, interactively
 
 sudo rm -rf /tmp/asterisk || true
 sudo mkdir /tmp/asterisk
 
-sudo "$CWD/result-asterisk/bin/asterisk" -C $CWD/result-conf/etc/asterisk/asterisk.conf -c -f -vvvvvvvvv
+sudo "$CWD/result-asterisk/bin/asterisk" -C "$CWD/result-conf/etc/asterisk/asterisk.conf" -c -f -vvvvvvvvv
 
