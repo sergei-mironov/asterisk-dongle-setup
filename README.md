@@ -164,6 +164,8 @@ References
 * Telethon API client documentation https://docs.telethon.dev/en/latest/
 * TG2SIP https://github.com/Infactum/tg2sip
 * Setting up TG2SIP (In Russian) https://voxlink.ru/kb/asterisk-configuration/ustanovka-i-nastrojka-sip-shljuza-dlja-telegram/
+* AsyncIO inotify interface https://github.com/giannitedesco/minotaur
+* AsyncIO inotify https://asyncinotify.readthedocs.io/en/latest/
 
 **Fun**
 
