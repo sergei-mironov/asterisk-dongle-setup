@@ -166,6 +166,8 @@ References
 * Setting up TG2SIP (In Russian) https://voxlink.ru/kb/asterisk-configuration/ustanovka-i-nastrojka-sip-shljuza-dlja-telegram/
 * AsyncIO inotify interface https://github.com/giannitedesco/minotaur
 * AsyncIO inotify https://asyncinotify.readthedocs.io/en/latest/
+* AsyncIO wait for multiple events
+  http://www.hydrogen18.com/blog/python-await-multiple.html
 
 **Fun**
 

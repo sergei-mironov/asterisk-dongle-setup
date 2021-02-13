@@ -92,6 +92,16 @@ let
       dongle-monitor = import ./nix/dongle-monitor.nix {
         inherit pkgs stdenv secrets usb_modeswitch; };
 
+      minotaur = python.buildPythonPackage rec {
+        pname = "minotaur";
+        version = "0.0.3";
+        doCheck = false; # Minotaur doesn't have tests
+        src = python.fetchPypi {
+          inherit pname version;
+          sha256 = "sha256:0i9py9rz2165hd3lnpa7h7iv7im5zq2qay5i84dw0q304ykj1z80";
+        };
+      };
+
       pyst2 = python.buildPythonPackage rec {
         pname = "pyst2";
         version = "0.5.1";
@@ -154,7 +164,7 @@ let
         version = "1.0";
         src = ./python;
         pythonPath = with pkgs.python37Packages; [
-          telethon
+          telethon minotaur
         ];
         doCheck = false;
       };
