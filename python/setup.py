@@ -2,9 +2,12 @@ from setuptools import setup, find_packages
 from distutils.spawn import find_executable
 
 setup(
-  name="telegram_check",
+  name="python_scripts",
   zip_safe=False, # https://mypy.readthedocs.io/en/latest/installed_packages.html
-  scripts=['telegram_check.py', 'telegram_send.py'],
+  package_dir={'':'lib'},
+  packages=find_packages(where='lib'),
+  scripts=['telegram_check.py', 'telegram_send.py', 'dongleman_send.py',
+           'dongleman_daemon.py', 'dongleman_spool.py'],
   python_requires='>=3.6',
 )
 

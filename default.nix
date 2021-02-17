@@ -2,6 +2,7 @@
 , stdenv ? pkgs.stdenv
 , secrets ? import ./secrets.nix
 , telegram_session ? throw "Please specify path to telegram session file"
+, dongleman_spool ?  throw "Please specify path to dongleman spool file"
 }:
 
 let
@@ -159,13 +160,34 @@ let
         };
       };
 
+      filelock = python.buildPythonPackage rec {
+        name = "filelock-${version}";
+        version = "2.0.12";
+
+        # buildInputs = with self; [ ];
+
+        src = pkgs.fetchgit {
+          url = "https://github.com/benediktschmitt/py-filelock";
+          rev = "0de5909050a61c4aba25e89a1c1024cb695ac4cb";
+          sha256 = "1m5pv1alh8fk9wc5zbyh397nl0v824zv0whwd7vn5531pcwwksb8";
+        };
+      };
+
       python-scripts = python.buildPythonApplication {
         pname = "python-scripts";
         version = "1.0";
         src = ./python;
         pythonPath = with pkgs.python37Packages; [
-          telethon minotaur
+          filelock telethon minotaur
         ];
+        patchPhase = ''
+          for f in *py; do
+            echo "Patching $f"
+            sed -i "s|%DONGLEMAN_SPOOL%|\"${dongleman_spool}\"|g" "$f"
+            sed -i "s|%DONGLEMAN_TGSESSION%|\"${telegram_session}\"|g" "$f"
+            sed -i "s|%DONGLEMAN_SECRETS%|\"${python_secrets_json}\"|g" "$f"
+          done
+        '';
         doCheck = false;
       };
 
