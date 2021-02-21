@@ -5,6 +5,7 @@ from sys import exit
 import asyncio
 from argparse import ArgumentParser
 from telethon import TelegramClient
+from os.path import isfile
 
 from json import load as json_load
 
@@ -12,38 +13,24 @@ import logging
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=logging.DEBUG)
 
+SESSION=%DONGLEMAN_TGSESSION%
+if SESSION.endswith('.session'):
+  assert isfile(SESSION)
+  SESSION = SESSION[:(len(SESSION)-len('.session'))]
 
-parser = ArgumentParser(description='Simple messaging client for Telegram.')
-parser.add_argument('--session', help='Path to session file')
-parser.add_argument('--secret',help='Path to secret.json')
-args = parser.parse_args()
-
-assert args.session is not None
-assert args.session[0]=='/', "Session path should be absolute"
-if args.session.endswith('.session'):
-  args.session = args.session[:(len(args.session)-len('.session'))]
-
-print(type(args.session), args.session)
-print(type(args.secret), args.secret)
-
-with open(args.secret, 'r') as f:
-  secret=json_load(f)
-
-telegram_app_title = secret['telegram_app_title']
-telegram_api_id = secret['telegram_api_id']
-telegram_api_hash = secret['telegram_api_hash']
-telegram_phone = secret['telegram_phone']
-telegram_bot_token = secret['telegram_bot_token']
-
-print(type(telegram_api_id), telegram_api_id)
-print(type(telegram_api_hash), telegram_api_hash)
-
+SECRETS=%DONGLEMAN_SECRETS%
+assert isfile(SECRETS), f"Secrets file not found: '{SECRETS}'"
+with open(SECRETS, 'r') as f:
+  secret_contents=json_load(f)
+TELEGRAM_API_ID = secret_contents['telegram_api_id']
+TELEGRAM_API_HASH = secret_contents['telegram_api_hash']
+TELEGRAM_PHONE = secret_contents['telegram_phone']
 
 async def main():
-  client = TelegramClient(session=args.session,
-                          api_id=telegram_api_id,
-                          api_hash=telegram_api_hash)
-  await client.start(phone=telegram_phone)
+  client = TelegramClient(session=SESSION,
+                          api_id=TELEGRAM_API_ID,
+                          api_hash=TELEGRAM_API_HASH)
+  await client.start(phone=TELEGRAM_PHONE)
   dialogs = await client.get_dialogs()
   print("Dialogs")
   for d in dialogs:

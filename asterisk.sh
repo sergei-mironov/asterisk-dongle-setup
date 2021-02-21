@@ -10,16 +10,12 @@ trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 # 1. Build required applications
 
-nix-build -A python_secrets_json -o result-python-secrets
-PYTHON_SECRETS=`readlink ./result-python-secrets`
-
 nix-build -A sox -o result-sox
 export PATH=`readlink ./result-sox`/bin/:$PATH
 sox --version
 
 nix-build -A asterisk -o result-asterisk -K
-nix-build -A asterisk-conf -o result-conf \
-          --argstr telegram_session "$TELEGRAM_SESSION"
+nix-build -A asterisk-conf -o result-conf
 nix-build -A python-scripts -o result-python
 nix-build -A tg2sip -o result-tg2sip
 nix-build -A tg2sip-conf -o result-tg2sip-conf
@@ -29,10 +25,9 @@ nix-build -A dongle-monitor -o result-dongle-monitor
 
 "$CWD/result-dongle-monitor/bin/dongle-monitor" &
 
-# 3. Preparing Telegram session
+# 3. Check Telegram session
 
-"$CWD/result-python/bin/telegram_check.py" --session="$TELEGRAM_SESSION" \
-                                          --secret="$PYTHON_SECRETS"
+"$CWD/result-python/bin/telegram_check.py"
 
 # 4. Run TG2SIP
 

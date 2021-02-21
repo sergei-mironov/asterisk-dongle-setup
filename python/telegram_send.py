@@ -7,10 +7,10 @@ from json import load as json_load
 from argparse import ArgumentParser
 from os.path import isfile
 
-NARGS=4
+NARGS=2
 parser = ArgumentParser(description='Simple messaging client for Telegram.')
 parser.add_argument('positionals', nargs=NARGS,
-                    help='SESSION SECRET TIME DEVICE')
+                    help='TIME DEVICE')
 parser.add_argument('--attach-voice', type=str, metavar='PATH',
                     help='File to attach', default=None)
 parser.add_argument('--message-base64', type=str, metavar='TEXT',
@@ -22,10 +22,8 @@ parser.add_argument('--from-name', type=str, metavar='TEXT',
 args = parser.parse_args()
 assert len(args.positionals) == NARGS
 
-session = args.positionals[0]
-secret = args.positionals[1]
-time = args.positionals[2]
-device = args.positionals[3]
+time = args.positionals[0]
+device = args.positionals[1]
 message = b64decode(args.message_base64).decode('utf-8') \
   if args.message_base64 is not None else args.message
 
@@ -39,10 +37,12 @@ else:
   else:
     fulltext = None
 
-
+session=%DONGLEMAN_TGSESSION%
 if session.endswith('.session'):
+  assert isfile(session)
   session = session[:(len(session)-len('.session'))]
 
+secret=%DONGLEMAN_SECRETS%
 with open(secret, 'r') as f:
   secret=json_load(f)
 telegram_api_id = secret['telegram_api_id']

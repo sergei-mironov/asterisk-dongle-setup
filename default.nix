@@ -1,13 +1,11 @@
 { pkgs ? import <nixpkgs> {}
 , stdenv ? pkgs.stdenv
 , secrets ? import ./secrets.nix
-, telegram_session ? throw "Please specify path to telegram session file"
-, dongleman_spool ?  throw "Please specify path to dongleman spool file"
 }:
 
 let
   inherit (secrets) telegram_master_nicname dongle_device_data
-                    dongle_device_audio;
+                    dongle_device_audio telegram_session dongleman_spool;
 
   python = pkgs.python37Packages;
 
@@ -394,7 +392,7 @@ let
           same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/telegram_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -415,7 +413,7 @@ let
           same => n,Return()
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/telegram_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -430,7 +428,7 @@ let
           same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
           same => n,Hangup()
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py "${telegram_session}" "${python_secrets_json}" ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/telegram_send.py ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
           EOF
 
           ###################
