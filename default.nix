@@ -392,7 +392,7 @@ let
           same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -413,7 +413,7 @@ let
           same => n,Return()
 
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -428,7 +428,7 @@ let
           same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
           same => n,Hangup()
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/telegram_send.py ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
           EOF
 
           ###################

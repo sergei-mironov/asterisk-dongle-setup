@@ -29,6 +29,11 @@ nix-build -A dongle-monitor -o result-dongle-monitor
 
 "$CWD/result-python/bin/telegram_check.py"
 
+# 4. Run the dongleman
+
+"$CWD/result-python/bin/dongleman_spool.py"
+"$CWD/result-python/bin/dongleman_daemon.py" &
+
 # 4. Run TG2SIP
 
 mkdir /tmp/tg2sip || true

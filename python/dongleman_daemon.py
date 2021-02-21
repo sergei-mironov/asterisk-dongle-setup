@@ -29,24 +29,21 @@ TELEGRAM_CHAT_ID = secret_contents['telegram_chat_id']
 
 async def send_telegram_message(client, message):
   voice_path=message.get('voice_path')
-  fulltext=f"{message.get('from_name','<unknown>')}: {message.get('message','')}"
-  reacted=False
+  fulltext=': '.join([message.get('from_name','<unknown-from>'),
+                      message.get('message','<unknown-message>')])
   if voice_path is not None:
     if not isfile(voice_path):
       await client.send_message(TELEGRAM_CHAT_ID,
-                                f"Error: {voice_path} is not a file")
+                                f"{fulltext}\nError: '{voice_path}' is not a file")
     else:
       await client.send_file(TELEGRAM_CHAT_ID,
                              voice_path,
                              voice_note=True,
                              caption=fulltext)
     remove(voice_path)
-    reacted=True
-
-  if fulltext is not None:
+  elif fulltext is not None:
     await client.send_message(TELEGRAM_CHAT_ID, fulltext)
-    reacted=True
-  if not reacted:
+  else:
     raise ValueError("Message should contain either message or voice file")
 
 

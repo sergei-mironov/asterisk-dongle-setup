@@ -5,11 +5,11 @@ from asyncio import get_event_loop
 from telethon import TelegramClient
 from json import load as json_load
 from argparse import ArgumentParser
-from os.path import isfile, join, isdir
+from os.path import isfile, join, isdir, basename
 from os import rename
 from json import dump as json_dump
 from dongleman.spool import (isspool, SPOOLSIZE, spool_lock, spool_tmp,
-                             spool_newname)
+                             spool_newname, spool_attaches)
 from tempfile import mktemp
 
 
@@ -33,7 +33,8 @@ time = args.positionals[0]
 device = args.positionals[1]
 
 message = b64decode(args.message_base64).decode('utf-8') \
-  if args.message_base64 is not None else args.message
+  if args.message_base64 is not None else (args.message \
+    if args.message is not None else "")
 
 # if args.from_name is not None and message is not None:
 #   fulltext = f"{args.from_name}: {message}"
@@ -50,7 +51,8 @@ def main():
   tattach=None
   if args.attach_voice is not None:
     assert isfile(args.attach_voice)
-    tattach=mktemp(dir=spool_attaches(spool))
+    tattach=join(spool_attaches(spool),basename(args.attach_voice))
+    assert not isfile(tattach), f"File '{tattach}' already exists"
     rename(args.attach_voice, tattach)
   msg={
     'from_name':args.from_name,

@@ -26,16 +26,8 @@ time = args.positionals[0]
 device = args.positionals[1]
 message = b64decode(args.message_base64).decode('utf-8') \
   if args.message_base64 is not None else args.message
-
-if args.from_name is not None and message is not None:
-  fulltext = f"{args.from_name}: {message}"
-else:
-  if args.from_name is not None:
-    fulltext = args.from_name
-  elif message is not None:
-    fulltext = message
-  else:
-    fulltext = None
+from_name=args.from_name if args.from_name is not None else "Unknown"
+fulltext=':'.join([f"{from_name} via {device}",message])
 
 session=%DONGLEMAN_TGSESSION%
 if session.endswith('.session'):
