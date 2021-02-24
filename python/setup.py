@@ -7,7 +7,7 @@ setup(
   package_dir={'':'lib'},
   packages=find_packages(where='lib'),
   scripts=['telegram_check.py', 'telegram_send.py', 'dongleman_send.py',
-           'dongleman_daemon.py', 'dongleman_spool.py'],
+           'dongleman_daemon.py', 'dongleman_spool.py', 'ari_test.py'],
   python_requires='>=3.6',
 )
 

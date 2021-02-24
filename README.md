@@ -157,6 +157,11 @@ References
   - OpenSource equivalent https://github.com/traud/asterisk-opus
 * Important dialplan commands:
   - Dial https://wiki.asterisk.org/wiki/display/AST/Application_Dial
+* ARI
+  - ARI Python interface https://github.com/asterisk/ari-py
+  - Introduction to ARI and channels https://wiki.asterisk.org/wiki/display/AST/Introduction+to+ARI+and+Channels
+  - ARI (without Python) https://wiki.asterisk.org/wiki/display/AST/Getting+Started+with+ARI
+    + About `wscat` in NixOS https://msitko.pl/blog/2020/04/22/isolated-ennvironments-with-nix-shell-and-zsh.html
 
 **Telegram**
 

@@ -112,6 +112,30 @@ let
         };
       };
 
+      swaggerpy = python.buildPythonPackage rec {
+        pname = "swaggerpy";
+        version = "0.2.1";
+        propagatedBuildInputs = with python ; [ requests websocket_client ];
+        doCheck = false; # local HTTP requests don't work
+        src = python.fetchPypi {
+          inherit pname version;
+          sha256 = "sha256:07xdmjqwv7rfv5828yc6dk7197w3h2qj2lqbpj0x37pb2wmvqm7s";
+        };
+      };
+
+      ari-py = python.buildPythonPackage rec {
+        pname = "ari-py";
+        version = "0.1.3";
+        buildInputs = with python ; [ swaggerpy ];
+        doCheck = false; # local HTTP requests don't work
+        src = pkgs.fetchFromGitHub {
+          owner = "asterisk";
+          repo = pname;
+          rev = "c182988ec87a9733913dd46a710cceba38fe60e7";
+          sha256 = "sha256:1bmf1pgabr9p54yp1r9n9vlmsyz8y9hwqchr6w1fs6dsix7d4bn6";
+        };
+      };
+
       tdlib_160 = stdenv.mkDerivation rec {
         version = "1.6.0";
         pname = "tdlib";
@@ -176,7 +200,7 @@ let
         version = "1.0";
         src = ./python;
         pythonPath = with pkgs.python37Packages; [
-          filelock telethon minotaur
+          filelock telethon minotaur ari-py
         ];
         patchPhase = ''
           for f in *py; do
@@ -457,6 +481,33 @@ let
           type=identify
           endpoint=telegram-endpoint
           match=127.0.0.1/255.255.255.255
+          EOF
+
+          ###################
+          ## HTTP.CONF
+          ###################
+
+          rm $out/etc/asterisk/http.conf
+          cat >$out/etc/asterisk/http.conf <<EOF
+          [general]
+          enabled = yes
+          bindaddr = 0.0.0.0
+          EOF
+
+          ###################
+          ## ARI.CONF
+          ###################
+
+          rm $out/etc/asterisk/ari.conf
+          cat >$out/etc/asterisk/ari.conf <<EOF
+          [general]
+          enabled = yes
+          pretty = yes
+
+          [asterisk]
+          type = user
+          read_only = no
+          password = asterisk
           EOF
         '';
       };
