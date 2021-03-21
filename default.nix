@@ -121,19 +121,37 @@ let
           inherit pname version;
           sha256 = "sha256:07xdmjqwv7rfv5828yc6dk7197w3h2qj2lqbpj0x37pb2wmvqm7s";
         };
+        postPatch = ''
+          for f in $(find -name '*\.py'); do
+            substituteInPlace $f \
+              --replace 'from swagger_model' 'from swaggerpy.swagger_model' \
+              --replace 'from processors' 'from swaggerpy.processors' \
+              --replace 'import urlparse' 'import urllib.parse as urlparse' \
+              --replace 'urllib.urlencode' 'urllib.parse.urlencode'
+          done
+        '';
       };
 
       ari-py = python.buildPythonPackage rec {
         pname = "ari-py";
         version = "0.1.3";
-        buildInputs = with python ; [ swaggerpy ];
+        propagatedBuildInputs = with python ; [ swaggerpy urllib3 ];
         doCheck = false; # local HTTP requests don't work
         src = pkgs.fetchFromGitHub {
           owner = "asterisk";
           repo = pname;
-          rev = "c182988ec87a9733913dd46a710cceba38fe60e7";
-          sha256 = "sha256:1bmf1pgabr9p54yp1r9n9vlmsyz8y9hwqchr6w1fs6dsix7d4bn6";
+          # rev = "c182988ec87a9733913dd46a710cceba38fe60e7";
+          # sha256 = "sha256:1bmf1pgabr9p54yp1r9n9vlmsyz8y9hwqchr6w1fs6dsix7d4bn6";
+          rev = "1647d79176d9ac0dacf4655ca6cb07bd70351f62";
+          sha256 = "sha256:0gb5jmnz84pzs2l311pl544410jvq5bdjmb1qnds6kx8r2acjj38";
         };
+
+      postPatch = ''
+        for f in $(find -name '*\.py'); do
+          substituteInPlace $f \
+            --replace 'import urlparse' 'import urllib.parse as urlparse'
+        done
+      '';
       };
 
       tdlib_160 = stdenv.mkDerivation rec {
