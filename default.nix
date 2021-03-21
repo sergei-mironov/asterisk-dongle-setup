@@ -448,6 +448,7 @@ let
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
           same => n,Set(JITTERBUFFER(adaptive)=default)
           same => n,Verbose(Inbound parameters set)
+          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message='Incoming voice call')
           same => n,Dial(PJSIP/tg#${telegram_master_nicname}@telegram-endpoint,15,b(dongle-incoming-tg^outbound^1))
           same => n,Verbose(DIALSTATUS ''${DIALSTATUS})
           same => n,GotoIf($["''${DIALSTATUS}" = "ANSWER"]?stop)

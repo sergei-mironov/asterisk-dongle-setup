@@ -60,7 +60,7 @@ def main():
     'voice_path':tattach,
     'time':time,
     'device':device
-  }
+    }
   tpath=mktemp(dir=spool_tmp(spool))
   with open(tpath,'w') as f:
     json_dump(msg,fp=f,indent=4)
