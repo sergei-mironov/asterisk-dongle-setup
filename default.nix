@@ -239,6 +239,14 @@ let
         '';
       };
 
+      gb-sound-files = stdenv.mkDerivation {
+        name = "gb-sound-files";
+        buildCommand = ''
+          mkdir -pv $out
+          cp -R ${./app/borya/sound}/*ulaw $out
+        '';
+      };
+
       sound-files = lenny-sound-files;
 
       asterisk-chan-dongle = stdenv.mkDerivation {
@@ -458,9 +466,9 @@ let
           exten => outbound,1,Set(JITTERBUFFER(adaptive)=default)
           same => n,Verbose(Outbound parameters set)
           same => n,Return()
-          exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
-          same => n,Playback(${lenny-sound-files}/Lenny''${i})
-          same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
+          exten => talk,1,Set(i=''${IF($["0''${i}"="08"]?6:$[0''${i}+1])})
+          same => n,Playback(${gb-sound-files}/gb''${i})
+          same => n,BackgroundDetect(${gb-sound-files}/backgroundnoise,1000)
           same => n,Hangup()
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})

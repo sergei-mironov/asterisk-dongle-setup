@@ -132,6 +132,14 @@ Issues
   https://github.com/traud/asterisk-opus
 * On top of above, we run Asterisk is as root, due to `chan_dongle` hardcodings.
 
+Hints
+-----
+
+### ULAW files
+
+Converting 3gpp to ulaw: `./3gpp2ulaw.sh`
+Playing ulaw file: `aplay -t raw -f MU_LAW <FILE>`
+
 References
 ----------
 
@@ -162,6 +170,8 @@ References
   - Introduction to ARI and channels https://wiki.asterisk.org/wiki/display/AST/Introduction+to+ARI+and+Channels
   - ARI (without Python) https://wiki.asterisk.org/wiki/display/AST/Getting+Started+with+ARI
     + About `wscat` in NixOS https://msitko.pl/blog/2020/04/22/isolated-ennvironments-with-nix-shell-and-zsh.html
+* ULAW
+  - https://ixnfo.com/en/how-to-convert-audio-files-to-ulaw-alaw-gsm-g722-etc-for-asterisk.html
 
 **Telegram**
 
