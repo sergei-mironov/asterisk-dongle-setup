@@ -239,11 +239,12 @@ let
         '';
       };
 
-      gb-sound-files = stdenv.mkDerivation {
-        name = "gb-sound-files";
+      robot-sound-files = stdenv.mkDerivation {
+        name = "robot-sound-files";
         buildCommand = ''
           mkdir -pv $out
-          cp -R ${./app/borya/sound}/*ulaw $out
+          cp -R ${./app/robot2}/backgroundnoise.ulaw \
+                ${./app/robot2}/Phrase_*ulaw $out
         '';
       };
 
@@ -466,9 +467,9 @@ let
           exten => outbound,1,Set(JITTERBUFFER(adaptive)=default)
           same => n,Verbose(Outbound parameters set)
           same => n,Return()
-          exten => talk,1,Set(i=''${IF($["0''${i}"="08"]?6:$[0''${i}+1])})
-          same => n,Playback(${gb-sound-files}/gb''${i})
-          same => n,BackgroundDetect(${gb-sound-files}/backgroundnoise,1000)
+          exten => talk,1,Set(i=''${IF($["0''${i}"="011"]?7:$[0''${i}+1])})
+          same => n,Playback(${robot-sound-files}/Phrase_''${i})
+          same => n,BackgroundDetect(${robot-sound-files}/backgroundnoise,1000)
           same => n,Hangup()
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})

@@ -135,10 +135,18 @@ Issues
 Hints
 -----
 
-### ULAW files
+### Ulaw audio operations:
 
-Converting 3gpp to ulaw: `./3gpp2ulaw.sh`
-Playing ulaw file: `aplay -t raw -f MU_LAW <FILE>`
+* Converting 3gpp to ulaw: `./3gpp2ulaw.sh`
+* Playing ulaw file: `aplay -t raw -f MU_LAW <FILE>`
+
+### Cutting last x seconds from an audio file
+
+```sh
+cutlast() {
+  ffmpeg -i "$2" -ss 0 -to $(echo $(ffprobe -i "$2" -show_entries format=duration -v quiet -of csv="p=0") - "$1" | bc) -c copy "$3"
+}
+```
 
 References
 ----------
