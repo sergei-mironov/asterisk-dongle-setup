@@ -37,30 +37,30 @@ Setup
    ![Modem E173](Modem_E173.jpg)
 
    You need to find a
-   supported GSM modem and plug it into USB port of your computer. We currently
-   support `Huawei-E173` but in theory any model supported by
+   supported GSM modem and plug it into the USB port of your computer. We tested
+   `Huawei-E173` only, but in theory any model supported by
    [chan_dongle](https://github.com/wdoekes/asterisk-chan-dongle)
    should work.
-   - Somewhat outdated document about supported hardware is available
+   - A somewhat outdated document about supported hardware is available
      [here](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations).
-     We typically care about Voice and SMS functions and don't care about USSD.
+     We typically do care about Voice and SMS functions and don't care about USSD.
    - `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If
      it is not present, the script would attempt to run the `usb_modeswitch`
      procedure.
-   - **Currently we automated switching only for Huawei E173 modem**.
-     For other models, see the section about [manual mode-switching](#Doing-USB-Modeswitch-manually).
+   - **Currently we automate switching only for Huawei E173 modem**.
+     For other models, try to follow the section about [manual mode-switching](#Doing-USB-Modeswitch-manually).
 2. `git clone --recursive <this-repo-url> ; cd ...`
 3. Create `./secrets.nix` file by copying and editing `./secrets_template.nix`.
    - You need a mobile phone which is bound to some Telegram account.
    - Go to https://my.telegram.org/auth and register an API Client instance.
      You will be provided with `api_id` and `api_hash` values.
-   - Bot token field is not currently used.
-   - Chat id is a (typically negative) identifier of a chat to send SMS messages
-     to. `./asterisk.sh` will print available chat identifiers of a client at
-     some point.
+   - The bot token field is not currently used.
+   - The Chat id field is a (typically negative) identifier of a chat to send SMS messages
+     to. `./asterisk.sh` will print available chat identifiers at
+     some point during the startup.
 4. **Please be informed that the main script `./asterisk.sh` is VERY INSECURE.
    It configures Asterisk to use binary codec and then runs it as root.**
-5. If you are OK with above notice, run `./asterisk.sh`.
+5. If you are OK with the above notice, run `./asterisk.sh`.
    - At first run script will initialize Telegram session for python relay
      script.
      + As a part of initialization, Telegram server will send a digital
