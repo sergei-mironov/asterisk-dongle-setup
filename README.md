@@ -131,6 +131,9 @@ Issues
 * Binary codec `chan_opus.so` is required by tg2sip. Consider replacing it with
   https://github.com/traud/asterisk-opus
 * On top of above, we run Asterisk is as root, due to `chan_dongle` hardcodings.
+* `dongleman_daemon` has to reconnect automatically in case of network failures.
+  Currently it issues the error `ConnectionError: Cannot send requests while
+  disconnected`.
 
 Hints
 -----
@@ -146,6 +149,24 @@ Hints
 cutlast() {
   ffmpeg -i "$2" -ss 0 -to $(echo $(ffprobe -i "$2" -show_entries format=duration -v quiet -of csv="p=0") - "$1" | bc) -c copy "$3"
 }
+```
+
+### Clearing dongle SMS messages
+
+```sh
+#!/bin/bash -x
+cmds()
+{
+cat <<EOF
+dongle cmd dongle0 AT+CPMS=\"SM\",\"SM\",\"SM\"
+dongle cmd dongle0 AT+CMGD=1,4
+dongle cmd dongle0 AT+CPMS=\"ME\",\"ME\",\"ME\"
+dongle cmd dongle0 AT+CMGD=1,4
+exit
+EOF
+}
+
+cmds | asterisk -r
 ```
 
 References
