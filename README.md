@@ -101,7 +101,7 @@ known to author. In case the procedure fails, one could attempt the manual way:
 Author uses VIM as the main development IDE. The start procedure is as follows:
 
 ```
-$ nix-shell -A shell
+$ nix-shell
 (nix-shell) $ vim .   # Edit sources enjoying code navigaiton
 (nix-shell) $ ipython # Testing telethon bot, etc
 ```
