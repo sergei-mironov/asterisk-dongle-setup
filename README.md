@@ -9,8 +9,10 @@ The project aims at automating the configuration of software able to solve the
 following tasks:
 
 * [x] Receive SMS messages and forward them to a Telegram chat.
-* [x] Forward voice calls to Telegram.
-* [ ] Handle voice calls with a chat bot.
+* [x] Receieve Incoming voice calls to Telegram.
+* [ ] Send outgoing voice calls from Telegram.
+* [x] Handle incoming voice calls with a Lenny chat bot.
+* [ ] Voice room with a chat bot.
 
 Contents
 --------
