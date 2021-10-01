@@ -170,7 +170,15 @@ let
       };
 
       pjsip = pkgs.pjsip.overrideAttrs (old: rec {
+
         pname = old.pname + "+opus";
+        version = "2.9";
+        src = pkgs.fetchFromGitHub {
+          owner = "pjsip";
+          repo = "pjproject";
+          rev = version;
+          sha256 = "sha256:0q6363dqls6wwhc2pnlzj2iyska9lg0wc2rskkyid4kfn1agfamp";
+        };
         buildInputs = old.buildInputs ++ [ pkgs.libopus.dev ];
         configureFlags = [ "--disable-sound" "CFLAGS=-O3" ];
         preBuild = ''
@@ -180,7 +188,7 @@ let
         '';
       });
 
-      tg2sip = stdenv.mkDerivation rec {
+      tg2sip = pkgs.gcc9Stdenv.mkDerivation rec {
         name = "tg2sip";
         version = "1.2.0";
 
