@@ -7,7 +7,7 @@ let
   inherit (secrets) telegram_master_nicname dongle_device_data
                     dongle_device_audio telegram_session dongleman_spool;
 
-  python = pkgs.python37Packages;
+  python = pkgs.python38Packages;
 
   local = rec {
     callPackage = pkgs.lib.callPackageWith collection;
@@ -25,7 +25,7 @@ let
         telethon
       ];
 
-      mypython = pkgs.python37.withPackages mypyps;
+      mypython = pkgs.python38.withPackages mypyps;
 
       shell = pkgs.mkShell {
         name = "shell";
@@ -225,7 +225,7 @@ let
         pname = "python-scripts";
         version = "1.0";
         src = ./python;
-        pythonPath = with pkgs.python37Packages; [
+        pythonPath = with python; [
           filelock telethon minotaur ari-py
         ];
         patchPhase = ''
