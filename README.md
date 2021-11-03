@@ -21,8 +21,9 @@ Contents
    - [Walkthrough](#Walkthrough)
    - [Doing USB Modeswitch manually](#Doing-USB-Modeswitch-manually)
    - [Nix-shell](#Nix-shell)
-2. [Hardware](#Hardware)
-3. [Issues](#Issues)
+2. [Hardware notes](#Hardware-notes)
+3. [Thirdparty issues](#Thirdparty-issues)
+4. [Administration hints](#Administration-hints)
 4. [References](#References)
 
 Setup
@@ -108,8 +109,8 @@ $ nix-shell
 (nix-shell) $ ipython # Testing telethon bot, etc
 ```
 
-Hardware
---------
+Hardware notes
+--------------
 
 We use the following USB dongle:
 
@@ -121,8 +122,8 @@ dongle0      0     Free       9    0    0       Beeline        E173       11.126
 
 See also [somewhat outdated list of supported devices](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
 
-Issues
-------
+Thirdparty issues
+-----------------
 
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/109~~
 * ~~https://github.com/wdoekes/asterisk-chan-dongle/issues/110~~
@@ -137,8 +138,8 @@ Issues
   Currently it issues the error `ConnectionError: Cannot send requests while
   disconnected`.
 
-Hints
------
+Administration hints
+--------------------
 
 ### Ulaw audio operations:
 
@@ -174,17 +175,17 @@ cmds | asterisk -r
 References
 ----------
 
-**GSM modems**
+### GSM modems
 
 * Asterisk+Dongle setup guide (in Russian)
   http://linux.mixed-spb.ru/asterisk/dongle_app1.php
 * Another Dongle guide in Russian
   https://jakondo.ru/podklyuchenie-gsm-modema-usb-huawei-e1550-k-asterisk-13-chan_dongle-na-debian-8-jessie/
-* Unrelated GSM software:
+* Random GSM software:
   - GSMCTL (abandoned?) https://www.unix.com/man-page/debian/8/gsmctl/
   - MMCLI https://www.freedesktop.org/software/ModemManager/man/1.0.0/mmcli.8.html
 
-**Asterisk**
+### Asterisk
 
 * Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
 * Generic information about PJSIP https://wiki.asterisk.org/wiki/display/AST/PJSIP+Configuration+Sections+and+Relationships
@@ -196,15 +197,16 @@ References
   - OpenSource equivalent https://github.com/traud/asterisk-opus
 * Important dialplan commands:
   - Dial https://wiki.asterisk.org/wiki/display/AST/Application_Dial
-* ARI
+* ARI (probably the preferred way to interact with Asterisk)
   - ARI Python interface https://github.com/asterisk/ari-py
   - Introduction to ARI and channels https://wiki.asterisk.org/wiki/display/AST/Introduction+to+ARI+and+Channels
   - ARI (without Python) https://wiki.asterisk.org/wiki/display/AST/Getting+Started+with+ARI
     + About `wscat` in NixOS https://msitko.pl/blog/2020/04/22/isolated-ennvironments-with-nix-shell-and-zsh.html
-* ULAW
+    + A sample websocket app in Python https://linuxhint.com/how-to-implement-a-websocket-in-python/
+* ULAW file format
   - https://ixnfo.com/en/how-to-convert-audio-files-to-ulaw-alaw-gsm-g722-etc-for-asterisk.html
 
-**Telegram**
+### Telegram
 
 * Client API access page https://my.telegram.org/auth
 * Telethon API client documentation https://docs.telethon.dev/en/latest/
@@ -215,7 +217,7 @@ References
 * AsyncIO wait for multiple events
   http://www.hydrogen18.com/blog/python-await-multiple.html
 
-**Fun**
+### Fun
 
 * Lenny https://crosstalksolutions.com/howto-pwn-telemarketers-with-lenny/
 
