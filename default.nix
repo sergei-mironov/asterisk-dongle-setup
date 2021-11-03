@@ -23,6 +23,7 @@ let
         pyst2
         ipython
         telethon
+        ari-py
       ];
 
       mypython = pkgs.python38.withPackages mypyps;
@@ -519,11 +520,13 @@ let
           [telegram-aors]
           type=aor
           contact=sip:telegram@127.0.0.1:5062
+          contact=sip:telegram@192.168.1.36:5063
 
           [telegram-identify]
           type=identify
           endpoint=telegram-endpoint
           match=127.0.0.1/255.255.255.255
+          match=192.168.1.36/255.255.255.255
           EOF
 
           ###################
