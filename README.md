@@ -197,14 +197,25 @@ References
   - OpenSource equivalent https://github.com/traud/asterisk-opus
 * Important dialplan commands:
   - Dial https://wiki.asterisk.org/wiki/display/AST/Application_Dial
-* ARI (probably the preferred way to interact with Asterisk)
-  - ARI Python interface https://github.com/asterisk/ari-py
-  - Introduction to ARI and channels https://wiki.asterisk.org/wiki/display/AST/Introduction+to+ARI+and+Channels
-  - ARI (without Python) https://wiki.asterisk.org/wiki/display/AST/Getting+Started+with+ARI
-    + About `wscat` in NixOS https://msitko.pl/blog/2020/04/22/isolated-ennvironments-with-nix-shell-and-zsh.html
-    + A sample websocket app in Python https://linuxhint.com/how-to-implement-a-websocket-in-python/
 * ULAW file format
   - https://ixnfo.com/en/how-to-convert-audio-files-to-ulaw-alaw-gsm-g722-etc-for-asterisk.html
+
+
+**ARI**
+
+* ARI (probably the preferred way to interact with Asterisk)
+  - ARI Python interface https://github.com/asterisk/ari-py
+  - Introduction to ARI and channels
+    https://wiki.asterisk.org/wiki/display/AST/Introduction+to+ARI+and+Channels
+* ARI (without Python)
+  https://wiki.asterisk.org/wiki/display/AST/Getting+Started+with+ARI
+* Local ARI explorer http://ari.asterisk.org/#!/asterisk
+* About `wscat` in NixOS
+  https://msitko.pl/blog/2020/04/22/isolated-ennvironments-with-nix-shell-and-zsh.html
+* A sample websocket app in Python
+  https://linuxhint.com/how-to-implement-a-websocket-in-python/
+* Python Websocket docs https://websockets.readthedocs.io/en/3.0/intro.html
+* Habr post about ARI https://habr.com/ru/post/308652/
 
 ### Telegram
 

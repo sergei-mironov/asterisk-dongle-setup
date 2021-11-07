@@ -39,7 +39,12 @@ nix-build -A dongle-monitor -o result-dongle-monitor
 mkdir /tmp/tg2sip || true
 cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
 ( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/gen_db"; )
-( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/tg2sip"; ) &
+( cd /tmp/tg2sip &&
+  while true ; do
+    "$CWD/result-tg2sip/bin/tg2sip"
+    sleep 1
+  done;
+) &
 
 # 5. Run Asterisk daemon synchronously, verbosely, interactively
 

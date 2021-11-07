@@ -17,13 +17,19 @@ let
       inherit pkgs;
       inherit (pkgs) sox yate;
 
-      mypyps = ppkgs: with ppkgs; [
+      mypyps = pp: let
+        pyls = pp.python-language-server.override { providers=["pycodestyle"]; };
+        pyls-mypy = pp.pyls-mypy.override { python-language-server=pyls; };
+        in with pp; [
         pandas
         requests
         pyst2
         ipython
         telethon
         ari-py
+        websockets
+        pyls
+        pyls-mypy
       ];
 
       mypython = pkgs.python38.withPackages mypyps;
@@ -497,6 +503,15 @@ let
           same => n,Hangup()
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
+
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+          [softphone-incoming-stasis]
+          exten => 1000,1,NoOp()
+          same =>      n,Answer()
+          same =>      n,Stasis(hello-world)
+          same =>      n,Hangup()
+
           EOF
 
           ###################
@@ -525,8 +540,25 @@ let
           [telegram-identify]
           type=identify
           endpoint=telegram-endpoint
-          match=127.0.0.1/255.255.255.255
-          match=192.168.1.36/255.255.255.255
+          match=127.0.0.1:5062/255.255.255.255
+
+          [softphone-endpoint]
+          type=endpoint
+          context=softphone-incoming-stasis
+          disallow=all
+          allow=opus
+          aors=softphone-aors
+
+          [softphone-aors]
+          type=aor
+          contact=sip:softphone@192.168.1.36:5063
+
+          [softphone-identify]
+          type=identify
+          endpoint=softphone-endpoint
+          match=127.0.0.1:5063/255.255.255.255
+
+
           EOF
 
           ###################
@@ -537,7 +569,7 @@ let
           cat >$out/etc/asterisk/http.conf <<EOF
           [general]
           enabled = yes
-          bindaddr = 0.0.0.0
+          bindaddr = 127.0.0.1
           EOF
 
           ###################
@@ -549,6 +581,7 @@ let
           [general]
           enabled = yes
           pretty = yes
+          allowed_origins = *
 
           [asterisk]
           type = user
