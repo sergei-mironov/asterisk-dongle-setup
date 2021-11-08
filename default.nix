@@ -30,6 +30,7 @@ let
         websockets
         pyls
         pyls-mypy
+        aiohttp
       ];
 
       mypython = pkgs.python38.withPackages mypyps;

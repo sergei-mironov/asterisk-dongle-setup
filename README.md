@@ -1,18 +1,20 @@
 Asterisk-dongle-setup
 =====================
 
-In this playground project we try to setup Asterisk server to work with
-[GSM-modem dongle](https://github.com/wdoekes/asterisk-chan-dongle) using
-[Nix](https://nixos.org) package manager.
-
-The project aims at automating the configuration of software able to solve the
-following tasks:
+This project aims at wiring together many pieces of Linux software required to
+do the following:
 
 * [x] Receive SMS messages and forward them to a Telegram chat.
-* [x] Receieve Incoming voice calls to Telegram.
-* [ ] Send outgoing voice calls from Telegram.
-* [x] Handle incoming voice calls with a Lenny chat bot.
+* [x] Receive GSM voice calls and forward them to Telegram voice calls.
+* [ ] Forward outgoing voice calls from Telegram back to GSM.
+* [x] Handle some incoming voice calls with a Lenny chat bot.
 * [ ] Voice room with a chat bot.
+
+Specifically, the setup includes [Asterisk server](http://asterisk.org/) with
+the [GSM-modem dongle](https://github.com/wdoekes/asterisk-chan-dongle) and
+[tg2sip](https://github.com/Infactum/tg2sip) bridge and many other components
+glued together with Shell and Python scripts. The high degree of build
+automation is achieved thanks to the [Nix](https://nixos.org) package manager.
 
 Contents
 --------
@@ -216,6 +218,8 @@ References
   https://linuxhint.com/how-to-implement-a-websocket-in-python/
 * Python Websocket docs https://websockets.readthedocs.io/en/3.0/intro.html
 * Habr post about ARI https://habr.com/ru/post/308652/
+
+* Wiki about making calls via ARI https://wiki.asterisk.org/wiki/display/AST/ARI+and+Bridges%3A+Basic+Mixing+Bridges
 
 ### Telegram
 
