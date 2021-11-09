@@ -56,6 +56,9 @@ let
         , "telegram_bot_token":"${telegram_bot_token}"
         , "telegram_phone":"${telegram_phone}"
         , "telegram_chat_id":${toString telegram_chat_id}
+        , "asterisk_ari_user":"${asterisk_ari_user}"
+        , "asterisk_ari_password":"${asterisk_ari_password}"
+        , "asterisk_ari_app":"${asterisk_ari_app}"
         }'');
 
       # FIXME: Toxic binary component! Get rid of it ASAP!
@@ -234,10 +237,10 @@ let
         version = "1.0";
         src = ./python;
         pythonPath = with python; [
-          filelock telethon minotaur ari-py
+          filelock telethon minotaur ari-py websockets
         ];
         patchPhase = ''
-          for f in *py; do
+          for f in $(find -type f -name '*.py'); do
             echo "Patching $f"
             sed -i "s|%DONGLEMAN_SPOOL%|\"${dongleman_spool}\"|g" "$f"
             sed -i "s|%DONGLEMAN_TGSESSION%|\"${telegram_session}\"|g" "$f"
@@ -313,7 +316,7 @@ let
 
       asterisk-conf = stdenv.mkDerivation {
         name = "asterisk-conf";
-        buildCommand = ''
+        buildCommand = with secrets; ''
           mkdir -pv $out
           mkdir -pv $out/etc/asterisk
           for f in ${asterisk}/etc/asterisk/* ; do
@@ -493,7 +496,7 @@ let
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
           [telegram-incoming-lenny]
-          exten => telegram,1,Verbose(Incoming from telegram)
+          exten => 1000,1,Verbose(Incoming from telegram)
           same => n,Monitor(wav,''${UNIQUEID},m)
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
           same => n,Goto(telegram-incoming-lenny,talk,1)
@@ -510,7 +513,7 @@ let
           [softphone-incoming-stasis]
           exten => 1000,1,NoOp()
           same =>      n,Answer()
-          same =>      n,Stasis(hello-world)
+          same =>      n,Stasis(${asterisk_ari_app})
           same =>      n,Hangup()
 
           EOF
@@ -528,7 +531,7 @@ let
 
           [telegram-endpoint]
           type=endpoint
-          context=telegram-incoming-lenny
+          context=softphone-incoming-stasis
           disallow=all
           allow=opus
           aors=telegram-aors
@@ -584,10 +587,10 @@ let
           pretty = yes
           allowed_origins = *
 
-          [asterisk]
+          [${asterisk_ari_user}]
           type = user
           read_only = no
-          password = asterisk
+          password = ${asterisk_ari_password}
           EOF
         '';
       };
@@ -620,7 +623,7 @@ let
                                 ; The value can take name address or URL format, and will look something
                                 ; like "sip:account@serviceprovider".
 
-        callback_uri=sip:telegram@127.0.0.1:5060 ; FIXME: unhardcode the port
+        callback_uri=sip:1000@127.0.0.1:5060 ; FIXME: unhardcode the port
                                 ; SIP URI for TG->SIP incoming calls processing
 
         raw_pcm=false           ; use L16@48k codec if true or OPUS@48k otherwise

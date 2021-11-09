@@ -31,8 +31,13 @@ nix-build -A dongle-monitor -o result-dongle-monitor
 
 # 4. Run the dongleman
 
+"$CWD/result-python/bin/dongleman_daemon.py" --check
 "$CWD/result-python/bin/dongleman_spool.py"
-"$CWD/result-python/bin/dongleman_daemon.py" &
+( while true; do
+    "$CWD/result-python/bin/dongleman_daemon.py" || true
+    sleep 1
+  done
+) &
 
 # 4. Run TG2SIP
 

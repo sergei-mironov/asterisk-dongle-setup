@@ -9,8 +9,8 @@ from json import loads as json_loads
 from uuid import uuid4
 
 APP='hello-world'
-USER='asterisk'
-PWD='asterisk'
+ARIUSER='asterisk'
+ARIPWD='asterisk'
 
 
 def post(cmd,args=None):
@@ -18,7 +18,7 @@ def post(cmd,args=None):
   url=f"http://localhost:8088/ari/{cmd}?" \
       f"{'&'.join([str(k)+'='+str(v) for k,v in args.items()])}"
   print(f"HTTP> {url}")
-  res=requests_post(url,auth=(USER,PWD),timeout=5)
+  res=requests_post(url,auth=(ARIUSER,ARIPWD),timeout=5)
   print(f"HTTP> {res}")
 
 def post_channel_create(endpoint):
@@ -45,7 +45,7 @@ def post_bridge_addchannels(brid,chids):
 async def start():
   print("<WS (connecting...)")
   async with wsconnect(('ws://localhost:8088/ari/events?'
-                        f'api_key={USER}:{PWD}&'
+                        f'api_key={ARIUSER}:{ARIPWD}&'
                         f'app={APP}')) as ws:
     print('WS> Connected!')
     chid_orig=None

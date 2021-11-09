@@ -6,7 +6,7 @@ do the following:
 
 * [x] Receive SMS messages and forward them to a Telegram chat.
 * [x] Receive GSM voice calls and forward them to Telegram voice calls.
-* [ ] Forward outgoing voice calls from Telegram back to GSM.
+* [x] Forward outgoing voice calls from Telegram back to GSM.
 * [x] Handle some incoming voice calls with a [Lenny prank bot](https://ottawacitizen.com/news/local-news/pitch-perfect-prank-lenny-answers-the-politicians-call).
 * [ ] Voice room with a chat bot.
 
@@ -237,6 +237,7 @@ References
 * AsyncIO inotify https://asyncinotify.readthedocs.io/en/latest/
 * AsyncIO wait for multiple events
   http://www.hydrogen18.com/blog/python-await-multiple.html
+* Some tutorial https://tutorialedge.net/python/concurrency/asyncio-event-loops-tutorial/
 * Waiting for messages https://stackoverflow.com/questions/66718923/python-telethon-wait-for-reply
 
 ### Fun

@@ -11,4 +11,13 @@
 
   tg2sip_api_id=throw "Specify your Telegram api_id for tg2sip as a number";
   tg2sip_api_hash= throw "Specify your Telegram API_HASH for tg2sip as a string";
+
+  dongle_device_data="/dev/ttyUSB0";
+  dongle_device_audio="/dev/ttyUSB1";
+
+  # Path for SMS forwarding queue from Asterisk to Telegram
+  dongleman_spool="/tmp/dongleman/spool";
+
+  asterisk_ari_user="asterisk";
+  asterisk_ari_password="asterisk";
 }

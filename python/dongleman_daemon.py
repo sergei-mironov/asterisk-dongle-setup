@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
-from asyncio import get_event_loop
+import sys
+from time import sleep
+from asyncio import get_event_loop, gather, Future, open_connection
 from minotaur import Inotify, Mask
 from argparse import ArgumentParser
 from os.path import isdir, isfile
 from os import remove
 from telethon import TelegramClient
+from telethon.events import NewMessage
+from json import load as json_load, loads as json_loads, JSONDecodeError
+from websockets import connect as wsconnect
+from base64 import b64encode
+from requests.utils import quote
 
 from dongleman.spool import spool_lock, isspool, spool_queue, spool_iterate
-from json import load as json_load, JSONDecodeError
+from dongleman.ari import (ARIUSER, ARIPWD, ARIAPP, aripost_channel_create,
+                           aripost_channel_ring, aripost_channel_dial,
+                           aripost_channel_answer, aripost_channel_continue,
+                           aripost_bridge_create, aripost_bridge_addchannels)
 
 SPOOL=%DONGLEMAN_SPOOL%
 assert isspool(SPOOL), f"Message pool should be a valid directory, got {SPOOL}"
@@ -66,17 +76,69 @@ async def listen_system_commands(client):
       await _handle()
 
 
+async def listen_asterisk_websocket(tclient):
+  port=8088
+  while True:
+    try:
+      r,w=await open_connection('localhost', port)
+      w.close(); await w.wait_closed()
+      break
+    except Exception as e:
+      print(f"<WS Waiting for socket")
+      sleep(1)
+  print(f"<WS (connecting as {ARIAPP})")
+  async with wsconnect((f'ws://localhost:{port}/ari/events?'
+                        f'api_key={ARIUSER}:{ARIPWD}&app={ARIAPP}')) as ws:
+    print('WS> Connected!')
+    chid_orig=None
+    chid_peer=None
+    while True:
+      e_str=await ws.recv()
+      e=json_loads(e_str)
+      if e['type']=='StasisStart':
+        print(f"WS> {e['type']} chanid {e['channel']['id']}")
+        if chid_orig is None:
+          chid_orig=e['channel']['id']
+          dst=Future()
+          @tclient.on(NewMessage(pattern=r'Call (\+?\w+)'))
+          async def handler(evt):
+            endp=quote(f'Dongle/dongle0/{evt.pattern_match.group(1)}')
+            await evt.reply(f"Calling to {endp}")
+            dst.set_result(endp)
+          await dst
+          aripost_channel_ring(chid_orig)
+          aripost_channel_create(dst.result())
+        else:
+          chid_peer=e['channel']['id']
+          brid=aripost_bridge_create('mixing')
+          aripost_bridge_addchannels(brid,[chid_orig,chid_peer])
+          aripost_channel_answer(chid_orig)
+          aripost_channel_dial(chid_peer)
+          # post_channel_continue(chid_orig,'telegram-incoming-lenny','telegram',1)
+      else:
+        print(f"WS> {e['type']}")
+
 
 async def main():
-  client = TelegramClient(session=SESSION,
-                          api_id=TELEGRAM_API_ID,
-                          api_hash=TELEGRAM_API_HASH)
+  print('Starting dongleman_daemon')
+  tclient=TelegramClient(session=SESSION,
+                         api_id=TELEGRAM_API_ID,
+                         api_hash=TELEGRAM_API_HASH)
   def _input_stub():
     raise RuntimeError("This script is not supposed to be interactive")
-  await client.start(code_callback=_input_stub)
-  await listen_system_commands(client)
+  await tclient.start(code_callback=_input_stub)
+  await gather(listen_system_commands(tclient),
+               listen_asterisk_websocket(tclient))
 
+if __name__=='__main__':
 
-# TODO: use this https://tutorialedge.net/python/concurrency/asyncio-event-loops-tutorial/
-get_event_loop().run_until_complete(main())
+  argv=sys.argv[1:]
+  if any([a in ['--check'] for a in argv]):
+    print('Asterisk-dongleman-daemon script syntax OK')
+    sys.exit(0)
+  if any([a in ['help','-h','--help'] for a in argv]):
+    print('Asterisk-dongleman-daemon')
+    sys.exit(1)
+
+  get_event_loop().run_until_complete(main())
 
