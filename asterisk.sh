@@ -8,7 +8,7 @@ set -e -x
 
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
-# 1. Build required applications
+# 1. Build the required applications
 
 nix-build -A sox -o result-sox
 export PATH=`readlink ./result-sox`/bin/:$PATH
@@ -41,7 +41,7 @@ cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
 ( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/gen_db"; )
 ( cd /tmp/tg2sip &&
   while true ; do
-    "$CWD/result-tg2sip/bin/tg2sip"
+    "$CWD/result-tg2sip/bin/tg2sip" || true
     sleep 1
   done;
 ) &
