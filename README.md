@@ -35,10 +35,13 @@ Setup
 
 ### Walkthrough
 
-0. Install [Nix package manager](https://nixos.org/guides/install-nix.html).
-   Note that it could easily co-exist with your native package manager. We use
-   [20.03 Nixpkgs tree](https://github.com/NixOS/nixpkgs/tree/076c67fdea6d0529a568c7d0e0a72e6bc161ecf5/)
-   as a base.
+0. Install [Nix package manager](https://nixos.org/guides/install-nix.html) and
+   update Nixpkgs repositories. This whole project is designed as a collection
+   of nix-build expressions.
+   * Note that Nix could co-exist with your native package manager.
+   * We use
+     [21.05 Nixpkgs branch commit](https://github.com/NixOS/nixpkgs/tree/d5aadbefd650cb0a05ba9c788a26327afce2396c/)
+     as a base, but older 20.03 commits should also work.
 1. Go and get a GSM modem.
 
    ![Modem E173](Modem_E173.jpg)
@@ -51,7 +54,7 @@ Setup
    - A somewhat outdated document about supported hardware is available
      [here](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations).
      We typically do care about Voice and SMS functions and don't care about USSD.
-   - `./asterisk.sh` will check for the presence of `/dev/ttyUSB0`. If
+   - `./run.sh` will check for the presence of `/dev/ttyUSB0`. If
      it is not present, the script would attempt to run the `usb_modeswitch`
      procedure.
    - **Currently we automate switching only for Huawei E173 modem**.
@@ -63,11 +66,12 @@ Setup
      You will be provided with `api_id` and `api_hash` values.
    - The bot token field is not currently used.
    - The Chat id field is a (typically negative) identifier of a chat to send SMS messages
-     to. `./asterisk.sh` will print available chat identifiers at
+     to. `./run.sh` will print available chat identifiers at
      some point during the startup.
-4. **Please be informed that the main script `./asterisk.sh` is VERY INSECURE.
+4. **Please be informed that the main script `./run.sh` is VERY INSECURE.
    It configures Asterisk to use binary codec and then runs it as root.**
-5. If you are OK with the above notice, run `./asterisk.sh`.
+5. If you are OK with the above notice, run `./run.sh`.
+   - The script asks Nix to (re-)build everything that is required.
    - At first run script will initialize Telegram session for python relay
      script.
      + As a part of initialization, Telegram server will send a digital
@@ -88,7 +92,7 @@ Setup
 
 ### Doing USB Modeswitch manually
 
-`asterisk.sh` attempts to run usb_modeswitch procedure automatically for devices
+`run.sh` attempts to run usb_modeswitch procedure automatically for devices
 known to author. In case the procedure fails, one could attempt the manual way:
 
 1. `nix-build -A usb_modeswitch`.
@@ -96,7 +100,7 @@ known to author. In case the procedure fails, one could attempt the manual way:
 3. `sudo ./result/usr/sbin/usb_modeswitch -v <vendor> -p <product> -X`
 4. `/dec/ttyUSB[01]` devices should appear. You should be able
    to `minicom -D /dev/ttyUSB0` and type some AT command, say `ATI`.
-5. Update `asterisk.sh` script by adding new line like below to the
+5. Update `run.sh` script by adding new line like below to the
    corresponding place
    ```
    try_to_deal_with "<your_device_id>" "<your_device_vendor>" && wait_for_chardev "/dev/ttyUSB0"
