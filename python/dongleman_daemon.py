@@ -34,6 +34,7 @@ with open(SECRETS, 'r') as f:
 TELEGRAM_API_ID = secret_contents['telegram_api_id']
 TELEGRAM_API_HASH = secret_contents['telegram_api_hash']
 TELEGRAM_CHAT_ID = secret_contents['telegram_chat_id']
+TELEGRAM_MASTER_NICKNAME = secret_contents['telegram_master_nicname']
 
 
 
@@ -90,31 +91,41 @@ async def listen_asterisk_websocket(tclient):
   async with wsconnect((f'ws://localhost:{port}/ari/events?'
                         f'api_key={ARIUSER}:{ARIPWD}&app={ARIAPP}')) as ws:
     print('WS> Connected!')
-    chid_orig=None
-    chid_peer=None
     while True:
       e_str=await ws.recv()
+      # print(f"WS> {e_str}")
       e=json_loads(e_str)
       if e['type']=='StasisStart':
         print(f"WS> {e['type']} chanid {e['channel']['id']}")
-        if chid_orig is None:
+        args=e['args']
+        if len(args)==0:
           chid_orig=e['channel']['id']
           dst=Future()
           @tclient.on(NewMessage(pattern=r'Call (\+?\w+)'))
           async def handler(evt):
-            endp=quote(f'Dongle/dongle0/{evt.pattern_match.group(1)}')
-            await evt.reply(f"Calling to {endp}")
-            dst.set_result(endp)
+            match=evt.pattern_match.group(1)
+            sender=await evt.get_sender()
+            if sender.username == TELEGRAM_MASTER_NICKNAME:
+              if match.lower()=='master':
+                endp=quote(f'PJSIP/tg#{TELEGRAM_MASTER_NICKNAME}@telegram-endpoint')
+              else:
+                endp=quote(f'Dongle/dongle0/{match}')
+              await evt.reply(f"Calling to {endp}")
+              dst.set_result(endp)
+            else:
+              await evt.reply(f"{sender.username} access denied")
           await dst
+          tclient.remove_event_handler(handler)
           aripost_channel_ring(chid_orig)
-          aripost_channel_create(dst.result())
+          aripost_channel_create(dst.result(),appArgs=chid_orig)
         else:
+          chid_orig=args[0]
           chid_peer=e['channel']['id']
           brid=aripost_bridge_create('mixing')
           aripost_bridge_addchannels(brid,[chid_orig,chid_peer])
           aripost_channel_answer(chid_orig)
           aripost_channel_dial(chid_peer)
-          # post_channel_continue(chid_orig,'telegram-incoming-lenny','telegram',1)
+          # post_channel_continue(chid_orig,'telegram-incoming-lenny','1000',1)
       else:
         print(f"WS> {e['type']}")
 

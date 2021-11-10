@@ -1,3 +1,4 @@
+from typing import Optional
 from os.path import isfile
 from requests import post as requests_post
 from requests.utils import quote
@@ -21,8 +22,11 @@ def aripost(cmd,args=None):
   res=requests_post(url,auth=(ARIUSER,ARIPWD),timeout=5)
   print(f"HTTP> {res}")
 
-def aripost_channel_create(endpoint):
-  aripost(f'channels/create',{'endpoint':endpoint,'app':ARIAPP})
+def aripost_channel_create(endpoint,appArgs:Optional[str]=None):
+  args={'endpoint':endpoint,'app':ARIAPP}
+  if appArgs is not None:
+    args.update({'appArgs':appArgs})
+  aripost(f'channels/create',args)
 
 def aripost_channel_ring(chanid):
   aripost(f'channels/{chanid}/ring')

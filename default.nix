@@ -54,6 +54,7 @@ let
         , "telegram_api_id":${toString telegram_api_id}
         , "telegram_api_hash":"${telegram_api_hash}"
         , "telegram_bot_token":"${telegram_bot_token}"
+        , "telegram_master_nicname":"${telegram_master_nicname}"
         , "telegram_phone":"${telegram_phone}"
         , "telegram_chat_id":${toString telegram_chat_id}
         , "asterisk_ari_user":"${asterisk_ari_user}"

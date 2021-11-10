@@ -180,6 +180,15 @@ EOF
 cmds | asterisk -r
 ```
 
+
+### Useful Asterisk commands
+
+**Show channels**
+
+```
+core show channels
+```
+
 References
 ----------
 
