@@ -12,12 +12,14 @@ from json import load as json_load, loads as json_loads, JSONDecodeError
 from websockets import connect as wsconnect
 from base64 import b64encode
 from requests.utils import quote
+from uuid import uuid4
 
 from dongleman.spool import spool_lock, isspool, spool_queue, spool_iterate
 from dongleman.ari import (ARIUSER, ARIPWD, ARIAPP, aripost_channel_create,
                            aripost_channel_ring, aripost_channel_dial,
                            aripost_channel_answer, aripost_channel_continue,
-                           aripost_bridge_create, aripost_bridge_addchannels)
+                           aripost_bridge_create, aripost_bridge_addchannels,
+                           aridel_bridge, aridel_channel, aripost_channel_var)
 
 SPOOL=%DONGLEMAN_SPOOL%
 assert isspool(SPOOL), f"Message pool should be a valid directory, got {SPOOL}"
@@ -35,6 +37,7 @@ TELEGRAM_API_ID = secret_contents['telegram_api_id']
 TELEGRAM_API_HASH = secret_contents['telegram_api_hash']
 TELEGRAM_CHAT_ID = secret_contents['telegram_chat_id']
 TELEGRAM_MASTER_NICKNAME = secret_contents['telegram_master_nicname']
+ASTERISK_BIND_ID = secret_contents['asterisk_bind_ip']
 
 
 
@@ -81,22 +84,24 @@ async def listen_asterisk_websocket(tclient):
   port=8088
   while True:
     try:
-      r,w=await open_connection('localhost', port)
+      r,w=await open_connection(ASTERISK_BIND_ID, port)
       w.close(); await w.wait_closed()
       break
     except Exception as e:
       print(f"<WS Waiting for socket")
       sleep(1)
   print(f"<WS (connecting as {ARIAPP})")
-  async with wsconnect((f'ws://localhost:{port}/ari/events?'
+  async with wsconnect((f'ws://{ASTERISK_BIND_ID}:{port}/ari/events?'
                         f'api_key={ARIUSER}:{ARIPWD}&app={ARIAPP}')) as ws:
     print('WS> Connected!')
+    chans:dict={}
     while True:
       e_str=await ws.recv()
       # print(f"WS> {e_str}")
       e=json_loads(e_str)
       if e['type']=='StasisStart':
         print(f"WS> {e['type']} chanid {e['channel']['id']}")
+        # print(e_str)
         args=e['args']
         if len(args)==0:
           chid_orig=e['channel']['id']
@@ -108,6 +113,8 @@ async def listen_asterisk_websocket(tclient):
             if sender.username == TELEGRAM_MASTER_NICKNAME:
               if match.lower()=='master':
                 endp=quote(f'PJSIP/tg#{TELEGRAM_MASTER_NICKNAME}@telegram-endpoint')
+              elif match.lower()=='linphone':
+                endp=quote(f'PJSIP/softphone-endpoint')
               else:
                 endp=quote(f'Dongle/dongle0/{match}')
               await evt.reply(f"Calling to {endp}")
@@ -116,8 +123,12 @@ async def listen_asterisk_websocket(tclient):
               await evt.reply(f"{sender.username} access denied")
           await dst
           tclient.remove_event_handler(handler)
-          aripost_channel_ring(chid_orig)
-          aripost_channel_create(dst.result(),appArgs=chid_orig)
+          aripost_channel_var(chid_orig,'JITTERBUFFER(adaptive)','default')
+          # aripost_channel_ring(chid_orig)
+          chid_peer=uuid4()
+          chans[chid_orig]=chid_peer
+          chid=aripost_channel_create(dst.result(),appArgs=chid_orig,fmt='opus',
+                                      chid=chid_peer)
         else:
           chid_orig=args[0]
           chid_peer=e['channel']['id']
@@ -125,7 +136,18 @@ async def listen_asterisk_websocket(tclient):
           aripost_bridge_addchannels(brid,[chid_orig,chid_peer])
           aripost_channel_answer(chid_orig)
           aripost_channel_dial(chid_peer)
-          # post_channel_continue(chid_orig,'telegram-incoming-lenny','1000',1)
+          aripost_channel_var(chid_peer,'JITTERBUFFER(adaptive)','default')
+      elif e['type']=='StasisEnd':
+        chid_exiter=e['channel']['id']
+        if chid_exiter in chans:
+          chid_peer=chans[chid_exiter]
+          print(f"WS> StasisEnd chanid {chid_exiter} chid_peer {chid_peer}")
+          aridel_channel(chid_peer)
+        else:
+          print(f"WS> StasisEnd chanid {chid_exiter}")
+      elif e['type']=='ChannelStateChange':
+        # print(e_str)
+        pass
       else:
         print(f"WS> {e['type']}")
 

@@ -60,6 +60,7 @@ let
         , "asterisk_ari_user":"${asterisk_ari_user}"
         , "asterisk_ari_password":"${asterisk_ari_password}"
         , "asterisk_ari_app":"${asterisk_ari_app}"
+        , "asterisk_bind_ip":"${asterisk_bind_ip}"
         }'');
 
       # FIXME: Toxic binary component! Get rid of it ASAP!
@@ -528,7 +529,9 @@ let
           [transport-udp]
           type=transport
           protocol=udp
-          bind=127.0.0.1
+          bind=${asterisk_bind_ip}
+          ; local_net=127.0.0.1/32
+          ; external_media_address=127.0.0.1
 
           [telegram-endpoint]
           type=endpoint
@@ -539,13 +542,15 @@ let
 
           [telegram-aors]
           type=aor
-          contact=sip:telegram@127.0.0.1:5062
-          contact=sip:telegram@192.168.1.36:5063
+          contact=sip:telegram@${tg2sip_bind_ip}:5062
+          ; contact=sip:telegram@192.168.1.36:5062
+          ; contact=sip:telegram@192.168.1.36:5063
 
           [telegram-identify]
           type=identify
           endpoint=telegram-endpoint
-          match=127.0.0.1:5062/255.255.255.255
+          match=${tg2sip_bind_ip}:5062/255.255.255.255
+          ; match=127.0.0.1:5062/255.255.255.255
 
           [softphone-endpoint]
           type=endpoint
@@ -556,7 +561,7 @@ let
 
           [softphone-aors]
           type=aor
-          contact=sip:softphone@192.168.1.36:5063
+          contact=sip:softphone@127.0.0.1:5063
 
           [softphone-identify]
           type=identify
@@ -574,8 +579,22 @@ let
           cat >$out/etc/asterisk/http.conf <<EOF
           [general]
           enabled = yes
-          bindaddr = 127.0.0.1
+          bindaddr = ${asterisk_bind_ip}
           EOF
+
+          ###################
+          ## RTP.CONF
+          ###################
+
+          # rm $out/etc/asterisk/rtp.conf
+          # cat >$out/etc/asterisk/rtp.conf <<EOF
+          # [general]
+          # rtpstart=10000
+          # rtpend=20000
+          # ice_acl = named_acl
+          # ice_deny = 0.0.0.0/0
+          # ice_permit = 127.0.0.1/32
+          # EOF
 
           ###################
           ## ARI.CONF
@@ -615,16 +634,16 @@ let
                                 ; 1-errors  3-info      5-verbose debug
 
         [sip]
-        public_address=127.0.0.1
+        public_address=${tg2sip_bind_ip}
         port=5062
         ;port_range=0           ; Specify the port range for socket binding, relative to the start
                                 ; port number specified in port.
-        id_uri=sip:telegram@127.0.0.1
+        id_uri=sip:telegram@${tg2sip_bind_ip}
                                 ; The Address of Record or AOR, that is full SIP URL that identifies the account.
                                 ; The value can take name address or URL format, and will look something
                                 ; like "sip:account@serviceprovider".
 
-        callback_uri=sip:1000@127.0.0.1:5060 ; FIXME: unhardcode the port
+        callback_uri=sip:1000@${asterisk_bind_ip}:5060 ; FIXME: unhardcode the port
                                 ; SIP URI for TG->SIP incoming calls processing
 
         raw_pcm=false           ; use L16@48k codec if true or OPUS@48k otherwise
