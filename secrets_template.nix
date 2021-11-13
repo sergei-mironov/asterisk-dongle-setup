@@ -11,6 +11,7 @@
 
   tg2sip_api_id=throw "Specify your Telegram api_id for tg2sip as a number";
   tg2sip_api_hash= throw "Specify your Telegram API_HASH for tg2sip as a string";
+  tg2sip_bind_ip="192.168.1.36"; # 127.0.0.1 doesn't work due to bug in tg2sip
 
   dongle_device_data="/dev/ttyUSB0";
   dongle_device_audio="/dev/ttyUSB1";
@@ -18,6 +19,7 @@
   # Path for SMS forwarding queue from Asterisk to Telegram
   dongleman_spool="/tmp/dongleman/spool";
 
+  asterisk_bind_ip="192.168.1.36";
   asterisk_ari_user="asterisk";
   asterisk_ari_password="asterisk";
 }
