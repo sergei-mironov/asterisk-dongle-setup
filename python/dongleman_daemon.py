@@ -11,7 +11,6 @@ from telethon.events import NewMessage
 from json import load as json_load, loads as json_loads, JSONDecodeError
 from websockets import connect as wsconnect
 from base64 import b64encode
-from requests.utils import quote
 from uuid import uuid4
 
 from dongleman.spool import spool_lock, isspool, spool_queue, spool_iterate
@@ -112,11 +111,11 @@ async def listen_asterisk_websocket(tclient):
             sender=await evt.get_sender()
             if sender.username == TELEGRAM_MASTER_NICKNAME:
               if match.lower()=='master':
-                endp=quote(f'PJSIP/tg#{TELEGRAM_MASTER_NICKNAME}@telegram-endpoint')
+                endp=f'PJSIP/tg#{TELEGRAM_MASTER_NICKNAME}@telegram-endpoint'
               elif match.lower()=='linphone':
-                endp=quote(f'PJSIP/softphone-endpoint')
+                endp=f'PJSIP/softphone-endpoint'
               else:
-                endp=quote(f'Dongle/dongle0/{match}')
+                endp=f'Dongle/dongle0/{match}'
               await evt.reply(f"Calling to {endp}")
               dst.set_result(endp)
             else:
