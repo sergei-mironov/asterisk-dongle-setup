@@ -46,6 +46,8 @@ cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
 ( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/gen_db"; )
 ( cd /tmp/tg2sip &&
   while true ; do
+    mkdir /tmp/tg2sip || true
+    cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
     "$CWD/result-tg2sip/bin/tg2sip" || true
     sleep 1
   done;

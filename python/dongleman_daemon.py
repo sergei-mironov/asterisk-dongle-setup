@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import re
 from time import sleep
 from asyncio import get_event_loop, gather, Future, open_connection
 from minotaur import Inotify, Mask
@@ -105,7 +106,7 @@ async def listen_asterisk_websocket(tclient):
         if len(args)==0:
           chid_orig=e['channel']['id']
           dst=Future()
-          @tclient.on(NewMessage(pattern=r'Call (\+?\w+)'))
+          @tclient.on(NewMessage(pattern=r'(.*)'))
           async def handler(evt):
             match=evt.pattern_match.group(1)
             sender=await evt.get_sender()
@@ -115,8 +116,9 @@ async def listen_asterisk_websocket(tclient):
               elif match.lower()=='linphone':
                 endp=f'PJSIP/softphone-endpoint'
               else:
-                endp=f'Dongle/dongle0/{match}'
-              await evt.reply(f"Calling to {endp}")
+                digits=''.join(filter(lambda x:re.match(r'[0-9+]',x),match))
+                endp=f'Dongle/dongle0/{digits}'
+              await evt.reply(f"Calling {endp}")
               dst.set_result(endp)
             else:
               await evt.reply(f"{sender.username} access denied")
