@@ -194,6 +194,7 @@ let
         };
         buildInputs = old.buildInputs ++ [ pkgs.libopus.dev ];
         configureFlags = [ "--disable-sound" "CFLAGS=-O3" ];
+        patches = []; # Disable the AARCH64 patch
         preBuild = ''
           mkdir tg2sip-src
           ${pkgs.atool}/bin/aunpack --extract-to=tg2sip-src ${tg2sip.src}
