@@ -125,10 +125,10 @@ Usage
 * Send SMS or make a call to your GSMmodem's SIM card. Asterisk will redirect
   them to your Telegram account. Asterisk records voice calls and sends
   recordings to the Telegram accounts as wav attachments.
-* From a thirdparty telegram account call to the accound associated with
-  `secrets.telegram_phone`, then go to chat and send a message with a phone
-  number to call to. Asterisk will call to establish an outgoing connection from
-  telegram to GSM network.
+* From a thirdparty telegram account call to the account associated with
+  `secrets.telegram_phone`, then go to the private chat and send a message with
+  a phone number to call to. Asterisk will call to establish an outgoing
+  connection from telegram to GSM network.
 
 
 Hardware notes
