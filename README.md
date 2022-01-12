@@ -25,10 +25,11 @@ Contents
    - [Walkthrough](#Walkthrough)
    - [Doing USB Modeswitch manually](#Doing-USB-Modeswitch-manually)
    - [Nix-shell](#Nix-shell)
-2. [Hardware notes](#Hardware-notes)
-3. [Thirdparty issues](#Thirdparty-issues)
-4. [Administration hints](#Administration-hints)
-4. [References](#References)
+2. [Usage](#usage)
+3. [Hardware notes](#Hardware-notes)
+4. [Thirdparty issues](#Thirdparty-issues)
+5. [Administration hints](#Administration-hints)
+6. [References](#References)
 
 Setup
 -----
@@ -82,13 +83,12 @@ Setup
      + It will ask you a phone number with Telegram account.
      + Telegram will send a code to your account. You have to read it and type
        it back into the script.
+   - At every run, the script runs a number of background services including the
+     Asteris ARI client, SMS spool script, tg2sip application etc.
+   - Finally, the Asterisk is run in foreground. You should see its `*CLI>`
+     console prompt and be able type commands.
 6. ???
-7. Do something:
-   * To send SMS from the GSM modem, use the Asterisk CLI: `dongle sms dongle0
-     89097777777 HiHi`.
-   * Send SMS or make a call to your GSMmodem's SIM card. Asterisk will redirect
-     them to your Telegram account.
-   * Also Asterisk will record calls and send recordings to Telegram.
+7. Check the [Usage](#usage) section.
 
 ### Doing USB Modeswitch manually
 
@@ -116,6 +116,20 @@ $ nix-shell
 (nix-shell) $ vim .   # Edit sources enjoying code navigaiton
 (nix-shell) $ ipython # Testing telethon bot, etc
 ```
+
+Usage
+-----
+
+* To send SMS from the GSM modem, use the Asterisk CLI: `dongle sms dongle0
+  89097777777 HiHi`.
+* Send SMS or make a call to your GSMmodem's SIM card. Asterisk will redirect
+  them to your Telegram account. Asterisk records voice calls and sends
+  recordings to the Telegram accounts as wav attachments.
+* From a thirdparty telegram account call to the accound associated with
+  `secrets.telegram_phone`, then go to chat and send a message with a phone
+  number to call to. Asterisk will call to establish an outgoing connection from
+  telegram to GSM network.
+
 
 Hardware notes
 --------------
