@@ -44,4 +44,8 @@
   asterisk_ari_user="asterisk";
   asterisk_ari_password="asterisk";
   asterisk_ari_app="dongleman-ari-app";
+
+  # Select sound files to be used in place of Lenny. The default (the only one
+  # which is shipped) is the Lenny himself
+  sound_files = avail : avail.lenny-sound-files;
 }

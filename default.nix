@@ -259,6 +259,8 @@ let
           mkdir -pv $out
           cp -R ${./app/lenny/sound}/* $out
         '';
+        pattern-phrase = "Lenny";
+        pattern-bg = "backgroundnoise";
       };
 
       robot-sound-files = stdenv.mkDerivation {
@@ -268,9 +270,15 @@ let
           cp -R ${./app/robot2}/backgroundnoise.ulaw \
                 ${./app/robot2}/Phrase_*ulaw $out
         '';
+        pattern-phrase = "Phrase_";
+        pattern-bg = "backgroundnoise";
       };
 
-      sound-files = lenny-sound-files;
+      sound-files = secrets.sound_files {
+        inherit lenny-sound-files robot-sound-files;
+      };
+      sound-pattern-phrase = files : var : "${files}/${files.pattern-phrase}${var}";
+      sound-pattern-bg = files : "${files}/${files.pattern-bg}";
 
       asterisk-chan-dongle = stdenv.mkDerivation {
         name = "asterisk-chan-dongle";
@@ -448,26 +456,29 @@ let
           cat >$out/etc/asterisk/extensions.conf <<"EOF"
           [general]
 
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-          [dongle-incoming-lenny]
-          exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
-          same => n,Set(MSG=--message-base64=''${SMS_BASE64})
-          same => n,Hangup()
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ; This section specifies a simple Lenny handler which records the
+          ; conversation.
 
-          exten => voice,1,Answer()
+          [telegram-incoming-lenny]
+          exten => 1000,1,Verbose(Incoming from telegram)
           same => n,Monitor(wav,''${UNIQUEID},m)
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
-          same => n,Goto(dongle-incoming-lenny,talk,1)
+          same => n,Goto(telegram-incoming-lenny,talk,1)
 
           exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
-          same => n,Playback(${lenny-sound-files}/Lenny''${i})
-          same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
-
+          same => n,Playback(${sound-pattern-phrase lenny-sound-files ("$"+"{i}")})
+          same => n,BackgroundDetect(${sound-pattern-bg lenny-sound-files},1000)
+          same => n,Hangup()
           exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
+          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
 
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ; This section specifies a voicecall handler which does the following:
+          ; 1) Dial the Telegram 2) If answered, establish the channel 3) If not
+          ; answered, enable Lenny-like robot 4) In any case, record the
+          ; conversation a send the recording to the Telegram
 
           [dongle-incoming-tg]
           exten => sms,1,Verbose(SMS-IN ''${CALLERID(num)} ''${SMS_BASE64})
@@ -490,28 +501,15 @@ let
           same => n,Verbose(Outbound parameters set)
           same => n,Return()
           exten => talk,1,Set(i=''${IF($["0''${i}"="011"]?7:$[0''${i}+1])})
-          same => n,Playback(${robot-sound-files}/Phrase_''${i})
-          same => n,BackgroundDetect(${robot-sound-files}/backgroundnoise,1000)
+          same => n,Playback(${sound-pattern-phrase sound-files ("$"+"{i}")})
+          same => n,BackgroundDetect(${sound-pattern-bg sound-files},1000)
           same => n,Hangup()
           exten => h,1,StopMonitor()
           same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-          [telegram-incoming-lenny]
-          exten => 1000,1,Verbose(Incoming from telegram)
-          same => n,Monitor(wav,''${UNIQUEID},m)
-          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
-          same => n,Goto(telegram-incoming-lenny,talk,1)
-
-          exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
-          same => n,Playback(${lenny-sound-files}/Lenny''${i})
-          same => n,BackgroundDetect(${lenny-sound-files}/backgroundnoise,1000)
-          same => n,Hangup()
-          exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
-
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ; This handler puts the incoming call into stasis to be controlled
+          ; with dongleman python script.
 
           [softphone-incoming-stasis]
           exten => 1000,1,NoOp()
