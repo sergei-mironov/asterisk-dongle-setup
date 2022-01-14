@@ -125,7 +125,7 @@ Usage
 * Send SMS or make a call to your GSMmodem's SIM card. Asterisk will redirect
   them to your Telegram account. Asterisk records voice calls and sends
   recordings to the Telegram accounts as wav attachments.
-  - If you pick up the phone from youe Telegram account (the green button), the
+  - If you pick up the phone from your Telegram account (the green button), the
     GSM-Telegram connection will be established.
   - If you cancel the call by pressing the red button instead, the caller will
     be handled by the brave
