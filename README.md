@@ -125,9 +125,15 @@ Usage
 * Send SMS or make a call to your GSMmodem's SIM card. Asterisk will redirect
   them to your Telegram account. Asterisk records voice calls and sends
   recordings to the Telegram accounts as wav attachments.
+  - If you pick up the phone from youe Telegram account (the green button), the
+    GSM-Telegram connection will be established.
+  - If you cancel the call by pressing the red button instead, the caller will
+    be handled by the brave
+    [Lenny](https://crosstalksolutions.com/howto-pwn-telemarketers-with-lenny/)
+    chatbot.
 * From a thirdparty telegram account call to the account associated with
   `secrets.telegram_phone`, then go to the private chat and send a message with
-  a phone number to call to. Asterisk will call to establish an outgoing
+  a phone number to call to. Asterisk will establish an outgoing
   connection from telegram to GSM network.
 
 
