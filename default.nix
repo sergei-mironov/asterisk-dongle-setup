@@ -566,6 +566,7 @@ let
           type=identify
           endpoint=softphone-endpoint
           match=127.0.0.1:5063/255.255.255.255
+          match=192.168.1.36:5063/255.255.255.255
 
 
           EOF
