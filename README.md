@@ -21,15 +21,25 @@ automation is achieved thanks to the [Nix](https://nixos.org) package manager.
 Contents
 --------
 
-1. [Setup](#Setup)
-   - [Walkthrough](#Walkthrough)
-   - [Doing USB Modeswitch manually](#Doing-USB-Modeswitch-manually)
-   - [Nix-shell](#Nix-shell)
-2. [Usage](#usage)
-3. [Hardware notes](#Hardware-notes)
-4. [Thirdparty issues](#Thirdparty-issues)
-5. [Administration hints](#Administration-hints)
-6. [References](#References)
+1. [Contents](#contents)
+2. [Setup](#setup)
+   * [Walkthrough](#walkthrough)
+   * [Doing USB Modeswitch manually](#doing-usb-modeswitch-manually)
+   * [Nix-shell](#nix-shell)
+3. [Usage](#usage)
+4. [Hardware notes](#hardware-notes)
+5. [Known issues](#known-issues)
+6. [Thirdparty issues](#thirdparty-issues)
+7. [Administration hints](#administration-hints)
+   * [Ulaw audio operations:](#ulaw-audio-operations:)
+   * [Cutting last x seconds from an audio file](#cutting-last-x-seconds-from-an-audio-file)
+   * [Clearing dongle SMS messages](#clearing-dongle-sms-messages)
+   * [Useful Asterisk commands](#useful-asterisk-commands)
+8. [References](#references)
+   * [GSM modems](#gsm-modems)
+   * [Asterisk](#asterisk)
+   * [Telegram](#telegram)
+   * [Fun](#fun)
 
 Setup
 -----
@@ -150,6 +160,12 @@ dongle0      0     Free       9    0    0       Beeline        E173       11.126
 ```
 
 See also [somewhat outdated list of supported devices](https://github.com/bg111/asterisk-chan-dongle/wiki/Requirements-and-Limitations)
+
+Known issues
+------------
+
+* tg2sip calls seems are not working properly. GSM callers hear themselves but
+  can't hear the telegram side. Softphone calls works fine.
 
 Thirdparty issues
 -----------------
