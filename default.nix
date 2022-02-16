@@ -204,10 +204,10 @@ let
 
       tg2sip = pkgs.gcc9Stdenv.mkDerivation rec {
         name = "tg2sip";
-        version = "1.2.0";
+        version = "1.3.0";
 
         buildInputs = with pkgs; [
-          openssl libopus.dev pkgconfig cmake pjsip spdlog_0 tdlib_160
+          openssl libopus.dev pkgconfig cmake pjsip spdlog_0 tdlib
           alsaLib
         ];
 
@@ -218,7 +218,7 @@ let
 
         src = pkgs.fetchurl {
           url = "https://github.com/Infactum/${name}/archive/v${version}.tar.gz";
-          sha256 = "sha256:0j7bmgzk6aic4kzqs46s4azjmg1vgykvw5vjncsy6s5z2fdp8iia";
+          sha256 = "sha256:1ql3b4hsdc3hjfzama64bl87mmqv12plbh83jn5s9vgvmk5cp9gh";
         };
       };
 
