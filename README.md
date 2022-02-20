@@ -133,19 +133,30 @@ Usage
 * To send SMS from the GSM modem, use the Asterisk CLI: `dongle sms dongle0
   89097777777 HiHi`.
 * Send SMS or make a call to your GSMmodem SIM card's number. Asterisk will
-  redirect the call to your Telegram account.
+  redirect the call to your `telegram_master_nicname` Telegram account.
   - For voice calls, If you pick up the phone from your Telegram account (the
     green button), the GSM-to-Telegram connection will be established.
-  - If you cancel the call by pressing the red button instead, the caller will
-    be handled by the brave
+  - If you cancel the Telegram call by pressing the red button instead, the
+    caller will be handled by the brave
     [Lenny](https://crosstalksolutions.com/howto-pwn-telemarketers-with-lenny/)
     chatbot.
   - In either case, Asterisk will record the call and send the recording to the
-    Telegram account as `wav` attachments.
+    Telegram `telegram_chat_id` (could be a group) with `wav` attachments.
 * From a thirdparty telegram account call to the account associated with
   `secrets.telegram_phone`, then go to the private chat and send a message with
   a phone number to call to. Asterisk will initiate an outgoing call
   from your Telegram account to the GSM network.
+* To call from the SIP softphone application to the GSM network:
+  - Install a softpfone application, e.g. [linphone](https://www.linphone.org/)
+  - Setup a local SIP account like `"softphone"
+    <sip:softphone@192.168.1.2:5063>` where `192.168.1.2` is your
+    `softphone_bind_ip` address. The `5063` is the SIP port the softphone
+    app should listen to. It is hardcoded into default.nix currently, but still
+    could be changed.
+  - Call to `sip:1000@192.168.1.1` where `192.168.1.1` is your
+    `asterisk_bind_ip` (could be the same as `softphone_bind_ip`).
+  - Open your `telegram_master_nicname` telegram chat and send the GSM number to
+    call to (this part seems a bit ugly, I'll try to make it more convenient)
 
 
 Hardware notes
@@ -164,8 +175,8 @@ See also [somewhat outdated list of supported devices](https://github.com/bg111/
 Known issues
 ------------
 
-* tg2sip calls seems are not working properly. GSM callers hear themselves but
-  can't hear the telegram side. Softphone calls works fine.
+* ~~tg2sip calls seems are not working properly. GSM callers hear themselves but
+  can't hear the telegram side. Softphone calls works fine.~~
 
 Thirdparty issues
 -----------------

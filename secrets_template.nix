@@ -48,4 +48,7 @@
   # Select sound files to be used in place of Lenny. The default (the only one
   # which is shipped) is the Lenny himself
   sound_files = avail : avail.lenny-sound-files;
+
+  # IP address to expect the softphone app will listen to
+  softphone_bind_ip="192.168.1.36";
 }

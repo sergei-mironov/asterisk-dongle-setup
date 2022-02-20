@@ -202,14 +202,28 @@ let
         '';
       });
 
+
+      tdlib = pkgs.tdlib.overrideAttrs (old: rec {
+        version = "1.8.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "tdlib";
+          repo = "td";
+          rev = "v${version}";
+          sha256 = "19psqpyh9a2kzfdhgqkirpif4x8pzy89phvi59dq155y30a3661q";
+        };
+      });
+
       tg2sip = pkgs.gcc9Stdenv.mkDerivation rec {
         name = "tg2sip";
         version = "1.3.0";
 
         buildInputs = with pkgs; [
-          openssl libopus.dev pkgconfig cmake pjsip spdlog_0 tdlib
-          alsaLib
-        ];
+          openssl libopus.dev pkgconfig cmake pjsip spdlog_0
+          alsaLib tdlib ];
+
+        patchPhase = ''
+          substituteInPlace ./CMakeLists.txt --replace 'Td 1.7.10' 'Td 1.8.0'
+        '';
 
         installPhase = ''
           mkdir -pv $out/bin
@@ -566,7 +580,7 @@ let
           type=identify
           endpoint=softphone-endpoint
           match=127.0.0.1:5063/255.255.255.255
-          match=192.168.1.36:5063/255.255.255.255
+          match=${softphone_bind_ip}:5063/255.255.255.255
 
 
           EOF
