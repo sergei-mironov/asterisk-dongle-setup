@@ -164,8 +164,8 @@ See also [somewhat outdated list of supported devices](https://github.com/bg111/
 Known issues
 ------------
 
-* tg2sip calls seems are not working properly. GSM callers hear themselves but
-  can't hear the telegram side. Softphone calls works fine.
+* tg2sip calls stopped working properly. GSM callers hear themselves but
+  can't hear the telegram side. Softphone calls work fine.
 
 Thirdparty issues
 -----------------
