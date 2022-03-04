@@ -15,7 +15,7 @@ logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s'
 
 SESSION=%DONGLEMAN_TGSESSION%
 if SESSION.endswith('.session'):
-  assert isfile(SESSION)
+  # assert isfile(SESSION)
   SESSION = SESSION[:(len(SESSION)-len('.session'))]
 
 SECRETS=%DONGLEMAN_SECRETS%
