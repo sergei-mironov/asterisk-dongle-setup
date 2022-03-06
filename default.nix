@@ -586,6 +586,17 @@ let
           EOF
 
           ###################
+          ## SIP.CONF
+          ###################
+
+          rm $out/etc/asterisk/sip.conf
+          cat >$out/etc/asterisk/sip.conf <<EOF
+          [general]
+          enabled = false;
+          websocket_enabled = false;
+          EOF
+
+          ###################
           ## HTTP.CONF
           ###################
 

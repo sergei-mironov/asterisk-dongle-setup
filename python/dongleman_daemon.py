@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import re
+from datetime import datetime
 from time import sleep
 from asyncio import get_event_loop, gather, Future, open_connection
 from minotaur import Inotify, Mask
@@ -105,31 +106,40 @@ async def listen_asterisk_websocket(tclient):
         args=e['args']
         if len(args)==0:
           chid_orig=e['channel']['id']
+          tstart=datetime.now()
           dst=Future()
           @tclient.on(NewMessage(pattern=r'(.*)'))
           async def handler(evt):
             match=evt.pattern_match.group(1)
             sender=await evt.get_sender()
             if sender.username == TELEGRAM_MASTER_NICKNAME:
-              if match.lower()=='master':
-                endp=f'PJSIP/tg#{TELEGRAM_MASTER_NICKNAME}@telegram-endpoint'
-              elif match.lower()=='linphone':
-                endp=f'PJSIP/softphone-endpoint'
+              if (datetime.now()-tstart).seconds>20:
+                await evt.reply(f"Timeout")
+                dst.set_result(None)
               else:
-                digits=''.join(filter(lambda x:re.match(r'[0-9+]',x),match))
-                endp=f'Dongle/dongle0/{digits}'
-              await evt.reply(f"Calling {endp}")
-              dst.set_result(endp)
+                if match.lower()=='master':
+                  endp=f'PJSIP/tg#{TELEGRAM_MASTER_NICKNAME}@telegram-endpoint'
+                elif match.lower()=='linphone':
+                  endp=f'PJSIP/softphone-endpoint'
+                else:
+                  digits=''.join(filter(lambda x:re.match(r'[0-9+]',x),match))
+                  endp=f'Dongle/dongle0/{digits}'
+                await evt.reply(f"Calling {endp}")
+                dst.set_result(endp)
             else:
-              await evt.reply(f"{sender.username} access denied")
+              dst.set_result(None)
           await dst
           tclient.remove_event_handler(handler)
           aripost_channel_var(chid_orig,'JITTERBUFFER(adaptive)','default')
           # aripost_channel_ring(chid_orig)
-          chid_peer=uuid4()
-          chans[chid_orig]=chid_peer
-          chid=aripost_channel_create(dst.result(),appArgs=chid_orig,fmt='opus',
-                                      chid=chid_peer)
+          dst_result=dst.result()
+          if dst_result is None:
+            print('WS> Canceling interaction')
+          else:
+            chid_peer=uuid4()
+            chans[chid_orig]=chid_peer
+            chid=aripost_channel_create(dst.result(),appArgs=chid_orig,
+                                        fmt='opus',chid=chid_peer)
         else:
           chid_orig=args[0]
           chid_peer=e['channel']['id']
