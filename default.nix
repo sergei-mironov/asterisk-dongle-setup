@@ -40,6 +40,7 @@ let
         buildInputs = [
           pkgs.ccls
           mypython
+          pkgs.gdb
         ];
       shellHook = with pkgs; ''
         export PYTHONPATH=`pwd`/python:$PYTHONPATH
@@ -196,9 +197,13 @@ let
         configureFlags = [ "--disable-sound" "CFLAGS=-O3" ];
         patches = []; # Disable the AARCH64 patch
         preBuild = ''
-          mkdir tg2sip-src
-          ${pkgs.atool}/bin/aunpack --extract-to=tg2sip-src ${tg2sip.src}
-          cp tg2sip-src/tg2sip*/buildenv/config_site.h pjlib/include/pj/config_site.h
+          if test -d ${tg2sip.src} ; then
+            cp ${tg2sip.src}/buildenv/config_site.h pjlib/include/pj/config_site.h
+          else
+            mkdir tg2sip-src
+            ${pkgs.atool}/bin/aunpack --extract-to=tg2sip-src ${tg2sip.src}
+            cp tg2sip-src/tg2sip*/buildenv/config_site.h pjlib/include/pj/config_site.h
+          fi
         '';
       });
 
@@ -221,6 +226,10 @@ let
           openssl libopus.dev pkgconfig cmake pjsip spdlog_0
           alsaLib tdlib ];
 
+        # dontStrip = true;
+        # cmakeFlags = [ "-DCMAKE_BUILD_TYPE=Debug" "-DCMAKE_C_FLAGS=-g"
+        #   "-DCMAKE_CXX_FLAGS=-g" "-DVERBOSE=1"];
+
         patchPhase = ''
           substituteInPlace ./CMakeLists.txt --replace 'Td 1.7.10' 'Td 1.8.0'
         '';
@@ -230,6 +239,7 @@ let
           cp -v tg2sip gen_db $out/bin
         '';
 
+        # src = ./tg2sip;
         src = pkgs.fetchurl {
           url = "https://github.com/Infactum/${name}/archive/v${version}.tar.gz";
           sha256 = "sha256:1ql3b4hsdc3hjfzama64bl87mmqv12plbh83jn5s9vgvmk5cp9gh";
@@ -470,24 +480,6 @@ let
           cat >$out/etc/asterisk/extensions.conf <<"EOF"
           [general]
 
-
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-          ; This section specifies a simple Lenny handler which records the
-          ; conversation.
-
-          [telegram-incoming-lenny]
-          exten => 1000,1,Verbose(Incoming from telegram)
-          same => n,Monitor(wav,''${UNIQUEID},m)
-          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
-          same => n,Goto(telegram-incoming-lenny,talk,1)
-
-          exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
-          same => n,Playback(${sound-pattern-phrase lenny-sound-files ("$"+"{i}")})
-          same => n,BackgroundDetect(${sound-pattern-bg lenny-sound-files},1000)
-          same => n,Hangup()
-          exten => h,1,StopMonitor()
-          same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} notadongle --from-name=callback ''${MSG} ''${VOICE})
-
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
           ; This section specifies a voicecall handler which does the following:
           ; 1) Dial the Telegram 2) If answered, establish the channel 3) If not
@@ -525,12 +517,19 @@ let
           ; This handler puts the incoming call into stasis to be controlled
           ; with dongleman python script.
 
-          [softphone-incoming-stasis]
+          [context-sip2gsm]
           exten => 1000,1,NoOp()
           same =>      n,Answer()
           same =>      n,Stasis(${asterisk_ari_app})
           same =>      n,Hangup()
 
+          exten => 1001,1,Verbose(Incoming from telegram)
+          same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
+          same => n,Goto(context-sip2gsm,talk,1)
+          exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
+          same => n,Playback(${sound-pattern-phrase lenny-sound-files ("$"+"{i}")})
+          same => n,BackgroundDetect(${sound-pattern-bg lenny-sound-files},1000)
+          same => n,Hangup()
           EOF
 
           ###################
@@ -543,12 +542,16 @@ let
           type=transport
           protocol=udp
           bind=${asterisk_bind_ip}
-          ; local_net=127.0.0.1/32
+          local_net=${tg2sip_bind_ip}/24
+          local_net=${softphone_bind_ip}/24
+          local_net=127.0.0.1/32
           ; external_media_address=127.0.0.1
 
           [telegram-endpoint]
           type=endpoint
-          context=softphone-incoming-stasis
+          transport=transport-udp
+          context=context-sip2gsm
+          rtp_symmetric=yes
           disallow=all
           allow=opus
           aors=telegram-aors
@@ -567,14 +570,16 @@ let
 
           [softphone-endpoint]
           type=endpoint
-          context=softphone-incoming-stasis
+          transport=transport-udp
+          context=context-sip2gsm
+          rtp_symmetric=yes
           disallow=all
           allow=opus
           aors=softphone-aors
 
           [softphone-aors]
           type=aor
-          contact=sip:softphone@127.0.0.1:5063
+          contact=sip:softphone@${softphone_bind_ip}:5063
 
           [softphone-identify]
           type=identify

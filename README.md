@@ -146,17 +146,20 @@ Usage
   `secrets.telegram_phone`, then go to the private chat and send a message with
   a phone number to call to. Asterisk will initiate an outgoing call
   from your Telegram account to the GSM network.
-* To call from the SIP softphone application to the GSM network:
-  - Install a softpfone application, e.g. [linphone](https://www.linphone.org/)
-  - Setup a local SIP account like `"softphone"
-    <sip:softphone@192.168.1.2:5063>` where `192.168.1.2` is your
+* Here is how to use a SIP softphone application, e.g.
+  [linphone](https://www.linphone.org/)
+  - Setup a client SIP account:
+    `<sip:softphone@192.168.1.2:5063>` where `192.168.1.2` is your
     `softphone_bind_ip` address. The `5063` is the SIP port the softphone
-    app should listen to. It is hardcoded into default.nix currently, but still
-    could be changed.
-  - Call to `sip:1000@192.168.1.1` where `192.168.1.1` is your
-    `asterisk_bind_ip` (could be the same as `softphone_bind_ip`).
-  - Open your `telegram_master_nicname` telegram chat and send the GSM number to
-    call to (this part seems a bit ugly, I'll try to make it more convenient)
+    application should listen to. It is currently hardcoded into `default.nix`
+    currently.
+  - Call to `sip:1001@192.168.1.1` where `192.168.1.1` is your
+    `asterisk_bind_ip` (could be the same as `softphone_bind_ip`) to talk to
+    Lenny.
+  - Call to `sip:1000@[asterisk_bind_ip]`.
+    + After the connection is established, open your `telegram_master_nicname`
+      telegram chat and send the GSM number to call to (this part seems a bit
+      ugly, I'll try to make it more convenient)
 
 
 Hardware notes
@@ -177,6 +180,9 @@ Known issues
 
 * ~~tg2sip calls stopped working properly. GSM callers hear themselves but
   can't hear the telegram side. Softphone calls work fine.~~
+
+* `tg2sip` crashes on incoming calls :(
+  https://github.com/Infactum/tg2sip/issues/63
 
 Thirdparty issues
 -----------------
