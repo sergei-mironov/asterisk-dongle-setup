@@ -25,25 +25,18 @@ nix-build -A dongle-monitor -o result-dongle-monitor
 
 "$CWD/result-dongle-monitor/bin/dongle-monitor" &
 
-# 3. Check Telegram session
+# 3. Allocate static resources
 
 "$CWD/result-python/bin/telegram_check.py"
-
-# 4. Run the dongleman
-
 "$CWD/result-python/bin/dongleman_daemon.py" --check
-"$CWD/result-python/bin/dongleman_spool.py"
-( while true; do
-    "$CWD/result-python/bin/dongleman_daemon.py" || true
-    sleep 1
-  done
-) &
+mkdir /tmp/tg2sip || true
+( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/gen_db"; )
+sudo rm -rf /tmp/asterisk || true
+sudo mkdir /tmp/asterisk
 
 # 4. Run TG2SIP
 
-mkdir /tmp/tg2sip || true
 cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
-( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/gen_db"; )
 ( cd /tmp/tg2sip &&
   while true ; do
     mkdir /tmp/tg2sip || true
@@ -53,10 +46,16 @@ cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
   done;
 ) &
 
-# 5. Run Asterisk daemon synchronously, verbosely, interactively
+# 5. Run the dongleman
 
-sudo rm -rf /tmp/asterisk || true
-sudo mkdir /tmp/asterisk
+"$CWD/result-python/bin/dongleman_spool.py"
+( while true; do
+    "$CWD/result-python/bin/dongleman_daemon.py" || true
+    sleep 1
+  done
+) &
+
+# 6. Run Asterisk daemon synchronously, verbosely, interactively
 
 sudo "$CWD/result-asterisk/bin/asterisk" -C "$CWD/result-conf/etc/asterisk/asterisk.conf" -c -f -vvvvvvvvv
 
