@@ -259,9 +259,6 @@ References
 ### Asterisk
 
 * Asterisk Wiki https://wiki.asterisk.org/wiki/display/AST
-* Generic information about PJSIP https://wiki.asterisk.org/wiki/display/AST/PJSIP+Configuration+Sections+and+Relationships
-* An article about PJSIP configuration https://www.redhat.com/sysadmin/asterisk-dialplan
-* Setting up TG2SIP (In Russian) https://voxlink.ru/kb/asterisk-configuration/ustanovka-i-nastrojka-sip-shljuza-dlja-telegram/
 * About OPUS codec:
   - https://community.asterisk.org/t/codec-opus-source-code/72738/6
   - Binary opus module 'sends some statistics back to Digium' http://downloads.digium.com/pub/telephony/codec_opus/
@@ -271,6 +268,13 @@ References
 * ULAW file format
   - https://ixnfo.com/en/how-to-convert-audio-files-to-ulaw-alaw-gsm-g722-etc-for-asterisk.html
 
+**PJSIP**
+
+* Generic information about PJSIP configuration sections
+  https://wiki.asterisk.org/wiki/display/AST/PJSIP+Configuration+Sections+and+Relationships
+  - Core config options https://wiki.asterisk.org/wiki/display/AST/Asterisk+12+Configuration_res_pjsip
+* An article about PJSIP configuration https://www.redhat.com/sysadmin/asterisk-dialplan
+* Setting up TG2SIP (In Russian) https://voxlink.ru/kb/asterisk-configuration/ustanovka-i-nastrojka-sip-shljuza-dlja-telegram/
 
 **ARI**
 

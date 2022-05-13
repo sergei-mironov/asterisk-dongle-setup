@@ -523,7 +523,7 @@ let
           same =>      n,Stasis(${asterisk_ari_app})
           same =>      n,Hangup()
 
-          exten => 1001,1,Verbose(Incoming from telegram)
+          exten => 1001,1,NoOp()
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
           same => n,Goto(context-sip2gsm,talk,1)
           exten => talk,1,Set(i=''${IF($["0''${i}"="016"]?7:$[0''${i}+1])})
@@ -568,24 +568,32 @@ let
           match=${tg2sip_bind_ip}:5062/255.255.255.255
           ; match=127.0.0.1:5062/255.255.255.255
 
-          [softphone-endpoint]
+          [softphone]
           type=endpoint
           transport=transport-udp
+          aors=softphone
+          auth=softphone-auth
           context=context-sip2gsm
           rtp_symmetric=yes
           disallow=all
           allow=opus
-          aors=softphone-aors
 
-          [softphone-aors]
+          [softphone]
           type=aor
-          contact=sip:softphone@${softphone_bind_ip}:5063
+          # contact=sip:softphone@${softphone_bind_ip}:5063
+          max_contacts=1
 
-          [softphone-identify]
-          type=identify
-          endpoint=softphone-endpoint
-          match=127.0.0.1:5063/255.255.255.255
-          match=${softphone_bind_ip}:5063/255.255.255.255
+          [softphone-auth]
+          type=auth
+          auth_type=userpass
+          password=softphone
+          username=softphone
+
+          # [softphone]
+          # type=identify
+          # endpoint=softphone
+          # match=127.0.0.1:5063/255.255.255.255
+          # match=${softphone_bind_ip}:5063/255.255.255.255
 
 
           EOF
