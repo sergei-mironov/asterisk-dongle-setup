@@ -6,8 +6,12 @@ do the following:
 
 * [x] Receive SMS messages and forward them to a Telegram chat.
 * [x] Receive GSM voice calls and forward them to Telegram voice calls.
+  - Broken due to https://github.com/Infactum/tg2sip/issues/63
+* [x] Receive GSM voice calls and forward them to a SIP client.
 * [x] Forward outgoing voice calls from Telegram back to GSM.
-* [x] Handle some incoming voice calls with a [Lenny prank bot](https://ottawacitizen.com/news/local-news/pitch-perfect-prank-lenny-answers-the-politicians-call).
+  - Broken due to https://github.com/Infactum/tg2sip/issues/63
+* [x] Forward outgoing voice calls from SIP client to GSM.
+* [x] Handle incoming voice calls with a [Lenny prank bot](https://ottawacitizen.com/news/local-news/pitch-perfect-prank-lenny-answers-the-politicians-call).
 * [ ] Voice room with a chat bot.
 
 Specifically, the setup includes [Asterisk server](http://asterisk.org/) with
@@ -148,18 +152,19 @@ Usage
   from your Telegram account to the GSM network.
 * Here is how to use a SIP softphone application, e.g.
   [linphone](https://www.linphone.org/)
-  - Setup a client SIP account:
-    `<sip:softphone@192.168.1.2:5063>` where `192.168.1.2` is your
-    `softphone_bind_ip` address. The `5063` is the SIP port the softphone
-    application should listen to. It is currently hardcoded into `default.nix`
-    currently.
-  - Call to `sip:1001@192.168.1.1` where `192.168.1.1` is your
-    `asterisk_bind_ip` (could be the same as `softphone_bind_ip`) to talk to
-    Lenny.
-  - Call to `sip:1000@[asterisk_bind_ip]`.
-    + After the connection is established, open your `telegram_master_nicname`
-      telegram chat and send the GSM number to call to (this part seems a bit
-      ugly, I'll try to make it more convenient)
+  - Install the softphone application.
+  - Setup a local SIP account: `<sip:softphone@192.168.1.2:5063>` where
+    `192.168.1.2` should be copied into `softphone_bind_ip` address. The `5063`
+    is the SIP port the softphone application should listen to. It is hardcoded
+    into `default.nix` currently.
+  - Set a remote SIP account to be `<sip:softphone@192.168.1.1>`  where
+    `192.168.1.1` is your `asterisk_bind_ip` (could be the same as
+    `softphone_bind_ip`). Set 'softphone' as a password (also hardcoded).
+  - Call to `sip:1001@192.168.1.1` to talk to Lenny bot
+  - Call to `sip:1000@192.168.1.1` to start the outgoing GSM call.
+    + After the connection is established, open Telegam chat with
+      `telegram_master_nicname` and send the GSM number to call to (a simple
+      oneline message). Asterisk will use GSM dongle to call this number.
 
 
 Hardware notes
@@ -199,6 +204,7 @@ Thirdparty issues
 * `dongleman_daemon` has to reconnect automatically in case of network failures.
   Currently it issues the error `ConnectionError: Cannot send requests while
   disconnected`.
+* https://github.com/Infactum/tg2sip/issues/63
 
 Administration hints
 --------------------

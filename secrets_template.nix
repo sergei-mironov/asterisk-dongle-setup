@@ -51,4 +51,10 @@
 
   # IP address to expect the softphone app will listen to
   softphone_bind_ip="192.168.1.36";
+
+  # How to handle incoming GSM voice calls:
+  # * `tg2sip` - Pass the call `telegram_master_nicname` via `tg2sip` bridge
+  # (broken due to https://github.com/Infactum/tg2sip/issues/63).
+  # * `sip` - Pass the call to the `softphone` SIP endpoint.
+  incoming_call_handler = "sip";
 }

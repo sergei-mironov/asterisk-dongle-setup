@@ -5,7 +5,7 @@
 
 let
   inherit (secrets) telegram_master_nicname dongle_device_data
-                    dongle_device_audio telegram_session dongleman_spool;
+  dongle_device_audio telegram_session dongleman_spool incoming_call_handler;
 
   python = pkgs.python38Packages;
 
@@ -345,9 +345,15 @@ let
                   "${codec_opus}/lib/asterisk/modules" ];
       };
 
-
-
       asterisk-tmp = "/tmp/asterisk";
+
+      handler_sip =
+        if incoming_call_handler == "tg2sip" then
+          "tg#${telegram_master_nicname}@telegram"
+        else if incoming_call_handler == "sip" then
+          "softphone"
+        else
+          throw "`incoming_call_handler` should be either `tg2sip` or `sip`";
 
       asterisk-conf = stdenv.mkDerivation {
         name = "asterisk-conf";
@@ -497,7 +503,7 @@ let
           same => n,Set(JITTERBUFFER(adaptive)=default)
           same => n,Verbose(Inbound parameters set)
           same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} --message='Incoming voice call')
-          same => n,Dial(PJSIP/tg#${telegram_master_nicname}@telegram-endpoint,15,b(dongle-incoming-tg^outbound^1))
+          same => n,Dial(PJSIP/${handler_sip},15,b(dongle-incoming-tg^outbound^1))
           same => n,Verbose(DIALSTATUS ''${DIALSTATUS})
           same => n,GotoIf($["''${DIALSTATUS}" = "ANSWER"]?stop)
           same => n,GotoIf($["''${DIALSTATUS}" = "NOANSWER"]?stop)
@@ -547,16 +553,16 @@ let
           local_net=127.0.0.1/32
           ; external_media_address=127.0.0.1
 
-          [telegram-endpoint]
+          [telegram]
           type=endpoint
+          aors=telegram
           transport=transport-udp
           context=context-sip2gsm
           rtp_symmetric=yes
           disallow=all
           allow=opus
-          aors=telegram-aors
 
-          [telegram-aors]
+          [telegram]
           type=aor
           contact=sip:telegram@${tg2sip_bind_ip}:5062
           ; contact=sip:telegram@192.168.1.36:5062
@@ -564,7 +570,7 @@ let
 
           [telegram-identify]
           type=identify
-          endpoint=telegram-endpoint
+          endpoint=telegram
           match=${tg2sip_bind_ip}:5062/255.255.255.255
           ; match=127.0.0.1:5062/255.255.255.255
 
@@ -580,7 +586,6 @@ let
 
           [softphone]
           type=aor
-          # contact=sip:softphone@${softphone_bind_ip}:5063
           max_contacts=1
 
           [softphone-auth]
@@ -588,13 +593,6 @@ let
           auth_type=userpass
           password=softphone
           username=softphone
-
-          # [softphone]
-          # type=identify
-          # endpoint=softphone
-          # match=127.0.0.1:5063/255.255.255.255
-          # match=${softphone_bind_ip}:5063/255.255.255.255
-
 
           EOF
 
