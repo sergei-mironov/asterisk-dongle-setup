@@ -5,12 +5,9 @@ This project aims at wiring together many pieces of Linux software required to
 do the following:
 
 * [x] Receive SMS messages and forward them to a Telegram chat.
-* [x] Receive GSM voice calls and forward them to Telegram voice calls.
-  - Broken due to https://github.com/Infactum/tg2sip/issues/63
-* [x] Receive GSM voice calls and forward them to a SIP client.
-* [x] Forward outgoing voice calls from Telegram back to GSM.
-  - Broken due to https://github.com/Infactum/tg2sip/issues/63
-* [x] Forward outgoing voice calls from SIP client to GSM.
+* [x] Receive GSM voice calls and forward them to ~~Telegram voice calls~~ (Telegram voice calls are broken due to https://github.com/Infactum/tg2sip/issues/63)
+or to a SIP client.
+* [x] Forward outgoing voice calls ~~from Telegram~~ from SIP client back to GSM
 * [x] Handle incoming voice calls with a [Lenny prank bot](https://ottawacitizen.com/news/local-news/pitch-perfect-prank-lenny-answers-the-politicians-call).
 * [ ] Voice room with a chat bot.
 
