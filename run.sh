@@ -30,13 +30,13 @@ nix-build -A dongle-monitor -o result-dongle-monitor
 "$CWD/result-python/bin/telegram_check.py"
 "$CWD/result-python/bin/dongleman_daemon.py" --check
 mkdir /tmp/tg2sip || true
+cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
 ( cd /tmp/tg2sip && "$CWD/result-tg2sip/bin/gen_db"; )
 sudo rm -rf /tmp/asterisk || true
 sudo mkdir /tmp/asterisk
 
 # 4. Run TG2SIP
 
-cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
 ( cd /tmp/tg2sip &&
   while true ; do
     mkdir /tmp/tg2sip || true
