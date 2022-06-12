@@ -28,6 +28,7 @@ nix-build -A dongle-monitor -o result-dongle-monitor
 # 3. Allocate static resources
 
 "$CWD/result-python/bin/telegram_check.py"
+"$CWD/result-python/bin/dongleman_spool.py"
 "$CWD/result-python/bin/dongleman_daemon.py" --check
 mkdir /tmp/tg2sip || true
 cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
@@ -48,7 +49,6 @@ sudo mkdir /tmp/asterisk
 
 # 5. Run the dongleman
 
-"$CWD/result-python/bin/dongleman_spool.py"
 ( while true; do
     "$CWD/result-python/bin/dongleman_daemon.py" || true
     sleep 1
