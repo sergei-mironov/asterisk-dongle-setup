@@ -70,8 +70,8 @@ async def listen_system_commands(client):
           print(f'Processing path {path}')
           try:
             await send_telegram_message(client, json_load(f))
-          except JSONDecodeError as err:
-            print(f"Error parsing JSON '{path}': {err}")
+          except Exception as err:
+            print(f"Exception while processing JSON '{path}': {err}")
 
   await _handle()
   with Inotify(blocking=False) as n:
