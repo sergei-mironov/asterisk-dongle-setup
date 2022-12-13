@@ -310,6 +310,11 @@ References
 * Some tutorial https://tutorialedge.net/python/concurrency/asyncio-event-loops-tutorial/
 * Waiting for messages https://stackoverflow.com/questions/66718923/python-telethon-wait-for-reply
 
+### Hardware
+
+* https://wiki.radxa.com/ROCKPI_S_PoE_HAT
+* https://www.raspberrypi.com/news/announcing-the-raspberry-pi-poe-hat/
+
 ### Fun
 
 * Lenny https://crosstalksolutions.com/howto-pwn-telemarketers-with-lenny/
