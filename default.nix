@@ -586,7 +586,7 @@ let
 
           [softphone]
           type=aor
-          max_contacts=1
+          max_contacts=5
 
           [softphone-auth]
           type=auth
