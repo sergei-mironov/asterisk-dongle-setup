@@ -17,8 +17,8 @@ sox --version
 nix-build -A asterisk -o result-asterisk -K
 nix-build -A asterisk-conf -o result-conf
 nix-build -A python-scripts -o result-python
-nix-build -A tg2sip -o result-tg2sip
-nix-build -A tg2sip-conf -o result-tg2sip-conf
+# nix-build -A tg2sip -o result-tg2sip
+# nix-build -A tg2sip-conf -o result-tg2sip-conf
 nix-build -A dongle-monitor -o result-dongle-monitor
 
 # 2. Prepare the modem. We may need to switch it to the serial mode.
@@ -38,14 +38,14 @@ sudo mkdir /tmp/asterisk
 
 # 4. Run TG2SIP
 
-( cd /tmp/tg2sip &&
-  while true ; do
-    mkdir /tmp/tg2sip || true
-    cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
-    "$CWD/result-tg2sip/bin/tg2sip" || true
-    sleep 1
-  done;
-) &
+# ( cd /tmp/tg2sip &&
+#   while true ; do
+#     mkdir /tmp/tg2sip || true
+#     cp -f "$CWD/result-tg2sip-conf/etc/settings.ini" /tmp/tg2sip/settings.ini
+#     "$CWD/result-tg2sip/bin/tg2sip" || true
+#     sleep 1
+#   done;
+# ) &
 
 # 5. Run the dongleman
 

@@ -224,7 +224,7 @@ let
 
         buildInputs = with pkgs; [
           openssl libopus.dev pkgconfig cmake pjsip spdlog_0
-          alsaLib tdlib ];
+          alsaLib tdlib_160 ];
 
         # dontStrip = true;
         # cmakeFlags = [ "-DCMAKE_BUILD_TYPE=Debug" "-DCMAKE_C_FLAGS=-g"
@@ -342,7 +342,8 @@ let
         name = "asterisk-modules";
         paths = [ "${asterisk}/lib/asterisk/modules"
                   asterisk-chan-dongle
-                  "${codec_opus}/lib/asterisk/modules" ];
+                  # "${codec_opus}/lib/asterisk/modules"
+                ];
       };
 
       asterisk-tmp = "/tmp/asterisk";
