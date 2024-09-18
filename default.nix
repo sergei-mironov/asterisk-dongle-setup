@@ -79,7 +79,7 @@ let
         '';
       };
 
-      asterisk = pkgs.asterisk_16.overrideAttrs (old: rec {
+      asterisk16 = pkgs.asterisk_16.overrideAttrs (old: rec {
         pname = old.pname + "+opus";
 
         configureFlags = old.configureFlags ++ [
@@ -88,11 +88,12 @@ let
 
         buildInputs = old.buildInputs ++ [ pkgs.libopus.dev ];
       });
+      asterisk = pkgs.asterisk_20;
 
       usb_modeswitch = stdenv.mkDerivation {
         name = "usb_modeswitch";
 
-        buildInputs = with pkgs; [libusb.dev pkgconfig gnumake];
+        buildInputs = with pkgs; [libusb.dev pkg-config gnumake];
 
         makeFlags = "DESTDIR=\${out}";
 
