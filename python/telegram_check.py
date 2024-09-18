@@ -25,12 +25,14 @@ with open(SECRETS, 'r') as f:
 TELEGRAM_API_ID = secret_contents['telegram_api_id']
 TELEGRAM_API_HASH = secret_contents['telegram_api_hash']
 TELEGRAM_PHONE = secret_contents['telegram_phone']
+TELEGRAM_BOT_TOKEN = secret_contents['telegram_bot_token']
 
 async def main():
   client = TelegramClient(session=SESSION,
                           api_id=TELEGRAM_API_ID,
                           api_hash=TELEGRAM_API_HASH)
-  await client.start(phone=TELEGRAM_PHONE)
+  # await client.start(phone=TELEGRAM_PHONE)
+  await client.start()
   dialogs = await client.get_dialogs()
   print("Dialogs")
   for d in dialogs:

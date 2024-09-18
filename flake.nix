@@ -12,7 +12,7 @@
     };
 
     secrets = {
-      url = "~/proj/asterisk-dongle-setup/secrets.nix";
+      url = "/home/admin/proj/asterisk-dongle-setup/secrets.nix";
       flake = false;
     };
 

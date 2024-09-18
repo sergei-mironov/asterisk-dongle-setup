@@ -1,6 +1,7 @@
 { pkgs ? import <nixpkgs> {}
-, stdenv ? pkgs.stdenv
+, revision ? null
 , secrets ? import ./secrets.nix
+, stdenv ? pkgs.stdenv
 }:
 
 let
@@ -18,8 +19,8 @@ let
       inherit (pkgs) sox yate;
 
       mypyps = pp: let
-        pyls = pp.python-language-server.override { providers=["pycodestyle"]; };
-        pyls-mypy = pp.pyls-mypy.override { python-language-server=pyls; };
+        pyls = pp.python-lsp-server.override { };
+        pyls-mypy = pp.pylsp-mypy.override { python-lsp-server=pyls; };
         in with pp; [
         pandas
         requests
@@ -33,7 +34,7 @@ let
         aiohttp
       ];
 
-      mypython = pkgs.python38.withPackages mypyps;
+      mypython = pkgs.python3.withPackages mypyps;
 
       shell = pkgs.mkShell {
         name = "shell";
