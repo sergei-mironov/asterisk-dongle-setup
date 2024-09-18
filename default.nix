@@ -1,10 +1,13 @@
 { pkgs ? import <nixpkgs> {}
+, asterisk-chan-dongle
+, secrets
 , revision ? null
-, secrets ? import ./secrets.nix
 , stdenv ? pkgs.stdenv
 }:
 
 let
+  asterisk-chan-dongle-src = asterisk-chan-dongle;
+
   inherit (secrets) telegram_master_nicname dongle_device_data
   dongle_device_audio telegram_session dongleman_spool incoming_call_handler;
 
@@ -315,7 +318,7 @@ let
         #   sha256 = "sha256:1nvbc5azqgpc7vwyc0mskqxpnrz8a65a37r6n7nisw3r9q7axasy";
         # };
 
-        src = ./asterisk-chan-dongle;
+        src = asterisk-chan-dongle-src;
 
         preConfigure = ''
           ./bootstrap

@@ -11,6 +11,11 @@
       url = "github:grwlf/nixpkgs/local17";
     };
 
+    asterisk-chan-dongle = {
+      url = "git+file:./asterisk-chan-dongle";
+      flake = false;
+    };
+
     secrets = {
       url = "/home/admin/proj/asterisk-dongle-setup/secrets.nix";
       flake = false;
@@ -18,11 +23,12 @@
 
   };
 
-  outputs = { self, nixpkgs, secrets }:
+  outputs = { self, nixpkgs, secrets, asterisk-chan-dongle }:
     let
       defaults = system : (import ./default.nix) {
         pkgs = import nixpkgs { inherit system; };
         revision = if self ? rev then self.rev else null;
+        asterisk-chan-dongle = asterisk-chan-dongle.outPath;
         secrets = import secrets.outPath;
       };
       defaults-x86_64 = defaults "x86_64-linux";

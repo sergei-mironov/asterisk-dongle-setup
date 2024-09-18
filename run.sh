@@ -10,16 +10,16 @@ trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 # 1. Build the required applications
 
-nix-build -A sox -o result-sox
+nix build '.#sox' -o result-sox
 export PATH=`readlink ./result-sox`/bin/:$PATH
 sox --version
 
-nix-build -A asterisk -o result-asterisk -K
-nix-build -A asterisk-conf -o result-conf
-nix-build -A python-scripts -o result-python
-# nix-build -A tg2sip -o result-tg2sip
-# nix-build -A tg2sip-conf -o result-tg2sip-conf
-nix-build -A dongle-monitor -o result-dongle-monitor
+nix build '.#asterisk' -o result-asterisk
+nix build '.#asterisk-conf' -o result-conf
+nix build '.#python-scripts' -o result-python
+# nix build '.#tg2sip' -o result-tg2sip
+# nix build '.#tg2sip-conf' -o result-tg2sip-conf
+nix build '.#dongle-monitor' -o result-dongle-monitor
 
 # 2. Prepare the modem. We may need to switch it to the serial mode.
 

@@ -31,8 +31,7 @@ async def main():
   client = TelegramClient(session=SESSION,
                           api_id=TELEGRAM_API_ID,
                           api_hash=TELEGRAM_API_HASH)
-  # await client.start(phone=TELEGRAM_PHONE)
-  await client.start()
+  await client.start(phone=TELEGRAM_PHONE)
   dialogs = await client.get_dialogs()
   print("Dialogs")
   for d in dialogs:
