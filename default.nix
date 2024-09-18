@@ -7,7 +7,7 @@ let
   inherit (secrets) telegram_master_nicname dongle_device_data
   dongle_device_audio telegram_session dongleman_spool incoming_call_handler;
 
-  python = pkgs.python38Packages;
+  python = pkgs.python3Packages;
 
   local = rec {
     callPackage = pkgs.lib.callPackageWith collection;
