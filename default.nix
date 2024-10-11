@@ -504,7 +504,7 @@ let
           same => n,Hangup()
 
           exten => voice,1,Answer()
-          same => n,Monitor(wav,''${UNIQUEID},m)
+          same => n,MixMonitor(wav,''${UNIQUEID},m)
           same => n,Set(VOICE=--attach-voice="${asterisk-tmp}/monitor/''${UNIQUEID}.wav")
           same => n,Set(JITTERBUFFER(adaptive)=default)
           same => n,Verbose(Inbound parameters set)
@@ -527,7 +527,7 @@ let
           same => n,Playback(${sound-pattern-phrase sound-files ("$"+"{i}")})
           same => n,BackgroundDetect(${sound-pattern-bg sound-files},1000)
           same => n,Hangup()
-          exten => h,1,StopMonitor()
+          exten => h,1,StopMixMonitor()
           same => n,System(${python-scripts}/bin/dongleman_send.py ''${EPOCH} ''${DONGLENAME} --from-name=''${CALLERID(num)} ''${MSG} ''${VOICE})
 
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
