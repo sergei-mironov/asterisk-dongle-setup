@@ -35,6 +35,7 @@ let
         pyls
         pyls-mypy
         aiohttp
+        filelock
       ];
 
       mypython = pkgs.python3.withPackages mypyps;
@@ -47,7 +48,7 @@ let
           pkgs.gdb
         ];
       shellHook = with pkgs; ''
-        export PYTHONPATH=`pwd`/python:$PYTHONPATH
+        export PYTHONPATH=`pwd`/python:`pwd`/python/lib:$PYTHONPATH
       '';
       };
 
