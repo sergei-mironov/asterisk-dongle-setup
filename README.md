@@ -131,8 +131,8 @@ $ nix-shell
 Usage
 -----
 
-* To send SMS from the GSM modem, use the Asterisk CLI: `dongle sms dongle0
-  89097777777 HiHi`.
+* To send SMS from the GSM modem, use the Asterisk CLI:
+  `dongle sms dongle0 89097777777 HiHi`.
 * Send SMS or make a call to your GSMmodem SIM card's number. Asterisk will
   redirect the call to your `telegram_master_nicname` Telegram account.
   - For voice calls, If you pick up the phone from your Telegram account (the
