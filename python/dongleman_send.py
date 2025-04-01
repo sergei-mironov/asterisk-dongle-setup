@@ -36,24 +36,18 @@ message = b64decode(args.message_base64).decode('utf-8') \
   if args.message_base64 is not None else (args.message \
     if args.message is not None else "")
 
-# if args.from_name is not None and message is not None:
-#   fulltext = f"{args.from_name}: {message}"
-# else:
-#   if args.from_name is not None:
-#     fulltext = args.from_name
-#   elif message is not None:
-#     fulltext = message
-#   else:
-#     fulltext = None
-
 
 def main():
   tattach=None
   if args.attach_voice is not None:
-    assert isfile(args.attach_voice)
-    tattach=join(spool_attaches(spool),basename(args.attach_voice))
-    assert not isfile(tattach), f"File '{tattach}' already exists"
-    rename(args.attach_voice, tattach)
+    try:
+      a=join(spool_attaches(spool),basename(args.attach_voice))
+      if isfile(a):
+        raise ValueError(f"File '{a}' already exists")
+      rename(args.attach_voice, a)
+      tattach=a
+    except (ValueError, OSError) as e:
+      print(f"Failed to attach {args.attach_voice}", e)
   msg={
     'from_name':args.from_name,
     'message':message,
